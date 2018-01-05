@@ -152,6 +152,26 @@ class ModelOptions:
         return (getattr(self, name) ==
             getattr(attr.fields(type(self)),name).default)
 
+    def get_formatted(self, setname):
+        output = ""
+        if setname == "defaults":
+            for key in self.__dict__:
+                if self.is_default(key):
+                    if len(output) != 0:
+                        output = output + "/n"
+                    output = output + key + "/n" + self.__dict__[key]
+            return output
+        #elif setname == "required":
+            # do stuff
+        #elif setname == "non-defaults":
+            # do stuff
+        #elif setname == "required-and-non-defaults":
+            # do stuff
+        #elif setname == "all":
+            # do stuff
+        #else
+            # do stuff
+
 #class SphereGroup:
 #    def __init__(self, sphere_list=list(), group_name=None, group_n=None,
 #            group_k=None, group_real_chiral=None,group_imag_chiral=None,
