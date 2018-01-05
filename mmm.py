@@ -93,20 +93,18 @@ class Sphere:
 
 @attr.s
 class ModelOptions:
-    number_spheres = attr.ib(default=None)
+    number_spheres = attr.ib(default="")
     sphere_position_file = attr.ib(default="at_bottom")
-    output_file = attr.ib(default=None)
     length_scale_factor = attr.ib(default=1)
-    real_ref_index_scale_factor = attr.ib(default=None)
-    imag_ref_index_scale_factor = attr.ib(default=None)
+    real_ref_index_scale_factor = attr.ib(default="1")
+    imag_ref_index_scale_factor = attr.ib(default="1")
     real_chiral_factor = attr.ib(default=0)
     imag_chiral_factor = attr.ib(default=0)
     medium_real_ref_index = attr.ib(default=1)
     medium_imag_ref_index = attr.ib(default=0)
     medium_real_chiral_factor = attr.ib(default=0)
     medium_imag_chiral_factor = attr.ib(default=0)
-    target_euler_angles_deg = attr.ib(default={'theta1': 0, 'theta2':0,
-        'theta3':0})
+    target_euler_angles_deg = attr.ib(default="0 0 0")
     mie_epsilon = attr.ib(default=1e-6)
     translation_epsilon = attr.ib(default=1e-8)
     solution_epsilon = attr.ib(default=1e-8)
@@ -116,18 +114,18 @@ class ModelOptions:
     store_translation_matrix = attr.ib(default=0)
     fixed_or_random_orientation = attr.ib(default=0)
     gaussian_beam_constant = attr.ib(default=0)
-    gaussian_beam_focal_point = attr.ib(default={'x':0,'y':0,'z':0})
+    gaussian_beam_focal_point = attr.ib(default="0 0 0")
     output_file = attr.ib(default="test.dat")
-    run_print_file = attr.ib(default="")
+    run_print_file = attr.ib(default="run_print.dat")
     write_sphere_data = attr.ib(default=1)
     incident_or_target_frame = attr.ib(default=0)
     min_scattering_angel_deg = attr.ib(default=0)
     max_scattering_angle_deg = attr.ib(default=180)
     min_scattering_plane_angle_deg = attr.ib(default=0)
     max_scattering_plane_angle_deg = attr.ib(default=0)
-    delta_scattering_angle_deg = attr.ib(default=None)
-    number_scattering_angles = attr.ib(default=None)
-    scattering_angle_file = attr.ib(default=None)
+    delta_scattering_angle_deg = attr.ib(default="")
+    number_scattering_angles = attr.ib(default="")
+    scattering_angle_file = attr.ib(default="")
     incident_azimuth_angle_deg = attr.ib(default=0)
     incident_polar_angle_deg = attr.ib(default=0)
     calculate_scattering_coefficients = attr.ib(default=1)
@@ -137,7 +135,7 @@ class ModelOptions:
     calculate_near_field = attr.ib(default=0)
     near_field_plane_coord = attr.ib(default=1)
     near_field_plane_position = attr.ib(default=0)
-    near_field_plane_vertices = attr.ib(default=None)
+    near_field_plane_vertices = attr.ib(default="")
     spacial_step_size = attr.ib(default=0.1)
     polarization_angle_deg = attr.ib(default=0)
     near_field_output_file = attr.ib(default="nf-temp.dat")
@@ -154,23 +152,53 @@ class ModelOptions:
 
     def get_formatted(self, setname):
         output = ""
+        required_keys = [ "number_spheres", "sphere_position_file",
+            "length_scale_factor", "real_ref_index_scale_factor",
+            "imag_ref_index_scale_factor", "medium_real_ref_index",
+            "medium_imag_ref_index", "fixed_or_random_orientation",
+            "output_file", "run_print_file", "scattering_coefficient_file" ]
+        
         if setname == "defaults":
             for key in self.__dict__:
                 if self.is_default(key):
                     if len(output) != 0:
-                        output = output + "/n"
-                    output = output + key + "/n" + self.__dict__[key]
+                        output = output + "\n"
+                    output = output + key + "\n" + str(self.__dict__[key])
             return output
-        #elif setname == "required":
-            # do stuff
-        #elif setname == "non-defaults":
-            # do stuff
-        #elif setname == "required-and-non-defaults":
-            # do stuff
-        #elif setname == "all":
-            # do stuff
-        #else
-            # do stuff
+        elif setname == "required":
+            #
+            # if fixed_or_random_orientation == 1
+            # t_matrix_file
+            for key in required_keys:
+                if len(output) != 0:
+                    output = output + "\n"
+                output = output + key + "\n" + str(self.__dict__[key])
+            if self.__dict__['fixed_or_random_orientation'] == 1:
+                output = ("\n" + 't_matrix_file' + "\n" +
+                    self.__dict__['t_matrix_file'])
+            return output
+        elif setname == "non-defaults":
+            for key in self.__dict__:
+                if not self.is_default(key):
+                    if len(output) != 0:
+                        output = output + "\n"
+                    output = output + key + "\n" + str(self.__dict__[key])
+            return output
+        elif setname == "required-and-non-defaults":
+            for key in self.__dict__:
+                if self.is_default(key) or key in required_keys:
+                    if len(output) != 0:
+                        output = output + "\n"
+                    output = output + key + "\n" + str(self.__dict__[key])
+            return output
+        elif setname == "all":
+            for key in self.__dict__:
+                if len(output) != 0:
+                    output = output + "\n"
+                output = output + key + "\n" + str(self.__dict__[key])
+            return output
+        else:
+            return False
 
 #class SphereGroup:
 #    def __init__(self, sphere_list=list(), group_name=None, group_n=None,
