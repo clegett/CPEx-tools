@@ -6,7 +6,7 @@ MSTM Model Manager program.
 
 Classes:
     Sphere
-    SphereGroup
+    ModelOptions
 
 """
 
@@ -145,7 +145,7 @@ class ModelOptions:
     t_matrix_file = attr.ib(default="tmatrix-temp.dat")
     t_matrix_convergence_epsilon = attr.ib(default=1e-6)
     sm_number_processors = attr.ib(default=10)
-        
+
     def is_default(self,name):
         return (getattr(self, name) ==
             getattr(attr.fields(type(self)),name).default)
@@ -157,7 +157,7 @@ class ModelOptions:
             "imag_ref_index_scale_factor", "medium_real_ref_index",
             "medium_imag_ref_index", "fixed_or_random_orientation",
             "output_file", "run_print_file", "scattering_coefficient_file" ]
-        
+
         if setname == "defaults":
             for key in self.__dict__:
                 if self.is_default(key):
@@ -200,38 +200,28 @@ class ModelOptions:
         else:
             return False
 
-#class SphereGroup:
-#    def __init__(self, sphere_list=list(), group_name=None, group_n=None,
-#            group_k=None, group_real_chiral=None,group_imag_chiral=None,
-#            tmatrix_file=None):
-#        self.sphere_list = sphere_list
-#        self.short_name = group_name
-#        self.group_n = group_n
-#        self.group_k = group_k
-#        self.group_real_chiral = group_real_chiral
-#        self.group_imag_chiral = group_imag_chiral
-#        self.tmatrix_file = tmatrix_file
-#
-#        if ((self.group_n is not None)
-#            or (self.group_k is not None)
-#            or (self.group_real_chiral is not None)
-#            or (self.group_imag_chiral is not None)):
-#            self.apply_oc(group_n, group_k, group_real_chiral,
-#                    group_imag_chiral)
-#
-#    def add_sphere(self, a_sphere):
-#        self.sphere_list.append(a_sphere)
-#
-#    def apply_oc(self, n=None, k=None, real_chiral=None, imag_chiral=None):
-#        if n is not None:
-#            for i in self.sphere_list:
-#                i.n = n
-#        if k is not None:
-#            for i in self.sphere_list:
-#                i.k = k
-#        if real_chiral is not None:
-#            for i in self.sphere_list:
-#                i.real_chiral = real_chiral
-#        if imag_chiral is not None:
-#            for i in self.sphere_list:
-#                i.imag_chiral = imag_chiral
+@attr.s
+class Grain:
+    host_sphere = attr.ib(default=None)
+    rim = attr.ib(default=None)
+    inclusions = attr.ib(default=None)
+    host_radius = attr.ib(default=None)
+    rim_thickness = attr.ib(default=None)
+    num_inclusions = attr.ib(default=None)
+
+    # generate inclusions
+    # move grain
+    # weight percent inclusions?
+
+
+@attr.s
+class Cluster:
+    grainlist = attr.ib(default=None)
+
+    # bounding sphere
+        # max distance between grain centers + 2*rim_r
+        # centered on midpoint between grain centers if r1=r2
+    # packing fraction
+        # volume of spheres/volume of bounding sphere
+    # geometric cross section
+        # pi*r_bounding^2
