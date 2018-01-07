@@ -12,6 +12,8 @@ Classes:
 
 from math import sqrt, pi
 import attr
+import numpy
+import random
 
 class Sphere:
     """A class describing the spheres used in the MSTM model
@@ -209,8 +211,48 @@ class Grain:
     rim_thickness = attr.ib(default=None)
     num_inclusions = attr.ib(default=None)
 
-    # generate inclusions
+    @classmethod
+    def new_grain(cls,x,y,z,r_host,dr_rim,r_incl,n_incl):
+        cls.host_sphere = mmm.Sphere(x,y,z,r_host)
+        cls.rim = mmm.Sphere(x,y,z,r_host+dr_rim)
+        cls.num_inclusions = 0
+        for i in range(n_incl):
+            theta = 2*math.pi*random.random()
+            phi = math.acos(2*random.random()-1)
+
+            random = random.random()
+            r = ((dr_rim - r_incl - 0.0002) * random) + ((r_host + r_incl) +
+                    0.0001)
+            this_x = r * math.cos(theta) * math.sin(phi)
+            this_y = r * math.sin(theta) * math.sin(phi)
+            this_z = r * math.cos(phi)
+
+            # Check if it is too close to another inclusion
+            if cls.num_inclusions > 0:
+                for j in range(cls.num_inclusions):
+                    pass
+
+            cls.inclusions.append(mmm.SPhere(this_x, this_y, this_z, r_incl))
+            cls.num_inclusions += 1
+
     # move grain
+    def move_to(self, x, y, z):
+        old_x = host_sphere.x
+        old_y = host_sphere.y
+        old_z = host_sphere.z
+        dx = x - old_x
+        dy = y - old_y
+        dz = z - old_z
+        self.host_sphere.x += dx
+        self.host_sphere.y += dy
+        self.host_sphere.z += dz
+        self.rim.x += dx
+        self.rim.y += dy
+        self.rim.z += dz
+        for inclusion in inclusions:
+            inclusion.x += dx
+            inclusion.y += dy
+            inclusion.z += dz
     # weight percent inclusions?
 
 
