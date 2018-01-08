@@ -213,10 +213,11 @@ class Grain:
 
     @classmethod
     def new_grain(cls,x,y,z,r_host,dr_rim,r_incl,n_incl):
-        cls.host_sphere = mmm.Sphere(x,y,z,r_host)
-        cls.rim = mmm.Sphere(x,y,z,r_host+dr_rim)
-        cls.num_inclusions = 0
-        for i in range(n_incl):
+        chost_sphere = mmm.Sphere(x,y,z,r_host)
+        crim = mmm.Sphere(x,y,z,r_host+dr_rim)
+        cnum_inclusions = 0
+        cinclusions = []
+        while cnum_inclusions < n_incl:
             theta = 2*math.pi*random.random()
             phi = math.acos(2*random.random()-1)
 
@@ -227,13 +228,23 @@ class Grain:
             this_y = r * math.sin(theta) * math.sin(phi)
             this_z = r * math.cos(phi)
 
-            # Check if it is too close to another inclusion
-            if cls.num_inclusions > 0:
-                for j in range(cls.num_inclusions):
-                    pass
+            j = 0
+            while j < cnum_inclusions:
+                p1 = (this_x, this_y, this_z)
+                p2 = (cinclusions[j].x, cinclusions[j].y,
+                        cinclusions[j].z)
+                distance = math.sqrt(sum([(a - b) ** 2 for a, b in zip(p1,
+                    p2)]))
+                if distance <= (2 * r_incl):
+                    break
+                j += 1
+            else:
+                cinclusions.append(mmm.Sphere(r_incl,this_x,this_y,this_z))
+                i += 1
+        return cls(host_sphere=chost_sphere, rim=crim,
+                inclusions=cinclusions, host_radius = r_host, rim_thickness =
+                dr_rim, num_inclusions = cnum_inclusions)
 
-            cls.inclusions.append(mmm.SPhere(this_x, this_y, this_z, r_incl))
-            cls.num_inclusions += 1
 
     # move grain
     def move_to(self, x, y, z):
