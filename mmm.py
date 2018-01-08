@@ -10,7 +10,7 @@ Classes:
 
 """
 
-from math import sqrt, pi
+import math
 import attr
 import numpy
 import random
@@ -91,7 +91,7 @@ class Sphere:
 
     def geom_x_sec(self):
         """Return the geometric cross section of this sphere."""
-        return pi * self.r ** 2
+        return math.pi * self.r ** 2
 
 @attr.s
 class ModelOptions:
@@ -213,16 +213,16 @@ class Grain:
 
     @classmethod
     def new_grain(cls,x,y,z,r_host,dr_rim,r_incl,n_incl):
-        chost_sphere = mmm.Sphere(x,y,z,r_host)
-        crim = mmm.Sphere(x,y,z,r_host+dr_rim)
+        chost_sphere = Sphere(x,y,z,r_host)
+        crim = Sphere(x,y,z,r_host+dr_rim)
         cnum_inclusions = 0
         cinclusions = []
         while cnum_inclusions < n_incl:
-            theta = 2*math.pi*random.random()
-            phi = math.acos(2*random.random()-1)
+            theta = 2 * math.pi * random.random()
+            phi = math.acos(2 * random.random()-1)
 
-            random = random.random()
-            r = ((dr_rim - r_incl - 0.0002) * random) + ((r_host + r_incl) +
+            arandom = random.random()
+            r = ((dr_rim - r_incl - 0.0002) * arandom) + ((r_host + r_incl) +
                     0.0001)
             this_x = r * math.cos(theta) * math.sin(phi)
             this_y = r * math.sin(theta) * math.sin(phi)
@@ -239,8 +239,9 @@ class Grain:
                     break
                 j += 1
             else:
-                cinclusions.append(mmm.Sphere(r_incl,this_x,this_y,this_z))
-                i += 1
+                cinclusions.append(Sphere(r_incl,this_x,this_y,this_z))
+                cnum_inclusions += 1
+
         return cls(host_sphere=chost_sphere, rim=crim,
                 inclusions=cinclusions, host_radius = r_host, rim_thickness =
                 dr_rim, num_inclusions = cnum_inclusions)
