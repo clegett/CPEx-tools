@@ -72,11 +72,12 @@ class Sphere:
         self.imag_chiral = imag_chiral
         self.tmatrix_file = tmatrix_file
 
-    def distance_from(self, x1, y1, z1):
+    def distance_from(self, another_sphere=None, x1=None, y1=None, z1=None):
         """Return the distance of the center of this sphere from the provided
         coordinates.
 
         Args:
+            another_sphere -- a second sphere to get the distance from
             x1 -- the x coord of the point from which distance is calculated
             y1 -- the y coord of the point from which distance is calculated
             z1 -- the z coord of the point from which distance is calculated
@@ -86,8 +87,12 @@ class Sphere:
             center of this sphere.
 
         """
-        return sqrt(
-            (self.x - x1) ** 2 + (self.y - y1) ** 2 + (self.z - z1) ** 2)
+        if another_sphere is None:
+            return sqrt(
+                (self.x - x1) ** 2 + (self.y - y1) ** 2 + (self.z - z1) ** 2)
+        else:
+            return (sqrt( (self.x - another_sphere.x) ** 2 + (self.y -
+                another_sphere.y) ** 2 + (self.z - another_sphere.z) ** 2))
 
     def geom_x_sec(self):
         """Return the geometric cross section of this sphere."""
@@ -265,6 +270,7 @@ class Grain:
             inclusion.x += dx
             inclusion.y += dy
             inclusion.z += dz
+
     # weight percent inclusions?
 
 
@@ -272,10 +278,65 @@ class Grain:
 class Cluster:
     grainlist = attr.ib(default=None)
 
-    # bounding sphere
-        # max distance between grain centers + 2*rim_r
-        # centered on midpoint between grain centers if r1=r2
-    # packing fraction
-        # volume of spheres/volume of bounding sphere
+    def get_bounding_sphere():
+    # max distance between grain centers + 2*rim_r
+    # centered on midpoint between grain centers if r1=r2
+        max_distance = 0
+        center = []
+        for grain_a in self.grainlist:
+            for grain_b in self.grainlist:
+                if ((grain_a.rim is not None) and (grain_b.rim is not None)):
+                    distance = (grain_a.rim.distance_to(grain_b.rim) +
+                        grain_a.rim.r + grain_b.rim.r)
+                    if (distance > max_distance):
+                        max_distance = distance
+                        center[0] = (grain_a.rim.x + grain_b.rim.x) / 2
+                        center[1] = (grain_a.rim.y + grain_b.rim.y) / 2
+                        center[2] = (grain_a.rim.z + grain_b.rim.z) / 2
+                elif ((grain_a.rim is not None) and (grain_b.rim is None)):
+                    distance = (grain_a.rim.distance_to(grain_b.host) +
+                        grain_a.rim.r + grain_b.host.r)
+                    if (distance > max_distance):
+                        max_distance = distance
+                        center[0] = (grain_a.rim.x + grain_b.host.x) / 2
+                        center[1] = (grain_a.rim.y + grain_b.host.y) / 2
+                        center[2] = (grain_a.rim.z + grain_b.host.z) / 2
+                elif ((grain_a.rim is None) and (grain_b.rim is not None)):
+                    distance = (grain_a.host.distance_to(grain_b.rim) +
+                        grain_a.host.r + grain_b.rim.r)
+                    if (distance > max_distance):
+                        max_distance = distance
+                        center[0] = (grain_a.host.x + grain_b.rim.x) / 2
+                        center[1] = (grain_a.host.y + grain_b.rim.y) / 2
+                        center[2] = (grain_a.host.z + grain_b.rim.z) / 2
+                elif ((grain_a.rim is None) and (grain_b.rim is None)):
+                    distance = (grain_a.host.distance_to(grain_b.host) +
+                        grain_a.host.r + grain_b.host.r)
+                    if (distance > max_distance):
+                        max_distance = distance
+                        center[0] = (grain_a.host.x + grain_b.host.x) / 2
+                        center[1] = (grain_a.host.y + grain_b.host.y) / 2
+                        center[2] = (grain_a.host.z + grain_b.host.z) / 2
+
+        return(mmm.Sphere(center[0],center[1],center[2],(max_distance/2)))
+
+    def get_packing_fraction(self):
+        vol_of_grains = 0
+        bounding_sphere = self.get_bounding_sphere()
+        vol_of_bounding_sphere = (4/3) * math.pi * bounding_sphere.r ** 3
+        for grain in self.grainlist:
+            if grain.rim is not None:
+                vol_of_grains += (4/3) * math.pi * grain.rim.r ** 3
+            elif grain.host is not None:
+                vol_of_grains += (4/3) * math.pi * grain.host.r ** 3
+            else:
+                # Should not get here, but may need to handle this later
+                pass
+
+        return vol_of_grains/vol_of_bounding_sphere
+
+
     # geometric cross section
-        # pi*r_bounding^2
+    def get_geom_xsection():
+        bounding_sphere = self.get_bounding_sphere()
+        return math.pi * bounding_sphere.r ** 2
