@@ -6,6 +6,8 @@ import argparse
 import sys
 import itertools
 import os
+import matplotlib.pyplot as plt
+import csv
 
 __author__ = 'Carey Legett'
 __copyright__ = 'Copyright 2018, Stony Brook University'
@@ -45,21 +47,18 @@ parser.add_argument('-n', '--start-line', nargs='?', default=0, help='''Skip\
 args = parser.parse_args()
 
 try:
-    with open(args.ifile, newline='')  as f:
-        rawdata=itertools.islice(f.readlines(),args.skip,None)
-        f.close()
+    with open(args.ifile, newline='') as infile:
+        rawdata=[line.split() for line in itertools.islice(infile,args.skip,
+            None)]
     if not rawdata:
-        sys.exit('No data in file ' + f)
+        sys.exit('No data in file ' + infile)
 except IOError as e:
     sys.exit('I/O error: file {}: {}'.format(args.ifile[0], e))
 except:
     sys.exit('Unexpected error: {}'.format(sys.exc_info()[0]))
 
-strippeddata = map(str.strip, rawdata)
-strdata = [line.split() for line in strippeddata]
-
 try:
-    data = [[float(astring) for astring in inner] for inner in strdata]
+    data = [[float(astring) for astring in inner] for inner in rawdata]
 except:
     sys.exit('''Converting strings to floats failed. Check input data. Error:\
     {}'''.format(sys.exc_info()[0]))
@@ -71,11 +70,22 @@ starty=data[args.xa-int(data[0][0])][1]
 stopy=data[args.xb-int(data[0][0])][1]
 
 print('Start: (' + str(startx) + ',' + str(starty) + ')')
+print('Stop: (' + str(stopx) + ',' + str(stopy) + ')')
 
 slope=(stopy-starty)/(stopx-startx)
 intercept=starty-(slope*startx)
 
+print('Continuum equation: y=' + str(slope) + '*x+' + str(intercept))
+
 for i in range(len(data)):
-    continuum=slope*data[i][1]+intercept
+    continuum=slope*data[i][0]+intercept
+    data[i].extend([continuum])
     data[i].extend([data[i][1]/continuum])
-    print(data[i])
+
+try:
+    with open(args.ofile, 'w', newline='') as outfile:
+        writer = csv.writer(outfile)
+        writer.writerow(['x','original','continuum','cont_removed'])
+        writer.writerows(data)
+except:
+   sys.exit('Output file error: {}'.format(sys.exc_info()[0]))
