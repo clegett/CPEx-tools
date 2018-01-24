@@ -6,7 +6,6 @@ import argparse
 import sys
 import itertools
 import os
-import matplotlib.pyplot as plt
 import csv
 
 __author__ = 'Carey Legett'
@@ -26,19 +25,20 @@ parser = argparse.ArgumentParser(prog='continuum_removal.py',
         carey.legett@stonybrook.edu.''')
 parser.add_argument('-f', '--input-file', required=True, help='''The\
         name of the input file (include path if the file is not in this\
-        directory)''', dest='ifile')
+        directory).''', dest='ifile')
 parser.add_argument('-o', '--output-file', nargs='?', default='output.txt', 
         help='''The name of the output file (include path if you want the file\
         somewhere other than in the current directory). Defaults to \
-        output.txt''', dest='ofile')
+        output.txt.''', dest='ofile')
 parser.add_argument('-a', '--xstart', type=int, required=True,
         help='The x value at which to begin the continuum calculation.', 
         dest='xa')
 parser.add_argument('-b', '--xstop', type=int, required=True,
         help='The x value at which to end the continuum calculation.', 
         dest='xb')
-parser.add_argument('-d', '--delimiter', nargs='?', default=',', help='''The\
-        delimiter for the input and output files. Defaults to \',\' ''', 
+parser.add_argument('-d', '--delimiter', default=',', help='''The\
+        delimiter for the input file. w for whitespace, or a single character
+        representing the actual delimiter.''', 
         dest='delim')
 parser.add_argument('-n', '--start-line', nargs='?', default=0, help='''Skip\
         this many lines of the input file before reading in data.''', type=int,
@@ -48,8 +48,15 @@ args = parser.parse_args()
 
 try:
     with open(args.ifile, newline='') as infile:
-        rawdata=[line.split() for line in itertools.islice(infile,args.skip,
-            None)]
+        if args.delim == 'w':
+            rawdata=[line.split() for line in itertools.islice(infile,args.skip,
+                None)]
+        elif len(args.delim) == 1:
+            rawdata=[line.split(args.delim) for line in \
+                itertools.isslice(infile, args.skip, None)]
+        else:
+            sys.exit('''Bad delimiter option "{}". Please run with -h option for
+            help.'''.format(args.delim))
     if not rawdata:
         sys.exit('No data in file ' + infile)
 except IOError as e:
