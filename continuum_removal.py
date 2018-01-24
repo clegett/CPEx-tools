@@ -3,20 +3,20 @@
 the continuum of the data between startx and stopx."""
 
 import argparse
-import csv
 import sys
 import itertools
+import os
 
-__author__ = "Carey Legett"
-__copyright__ = "Copyright 2018, Stony Brook University"
-__credits__ = ["Carey Legett"]
+__author__ = 'Carey Legett'
+__copyright__ = 'Copyright 2018, Stony Brook University'
+__credits__ = ['Carey Legett']
 
-__version__ = "1.0"
-__maintainer__ = "Carey Legett"
-__email__ = "carey.legett@stonybrook.edu"
-__status__ = "Development"
+__version__ = '1.0'
+__maintainer__ = 'Carey Legett'
+__email__ = 'carey.legett@stonybrook.edu'
+__status__ = 'Development'
 
-parser = argparse.ArgumentParser(prog="continuum_removal.py",
+parser = argparse.ArgumentParser(prog='continuum_removal.py',
         description='''This program takes a delimited text file containing
         x and y values and fits a line from y(xstart) to y(xstop) and
         normalizes all y data such that the linear fit line is at a value
@@ -44,13 +44,23 @@ parser.add_argument('-n', '--start-line', nargs='?', default=0, help='''Skip
 
 args = parser.parse_args()
 
-mydialect = csv.register_dialect('asd', delimiter=args.delim, 
-        skipinitialspace=False)
+#mydialect = csv.register_dialect('asd', delimiter=args.delim, 
+#        skipinitialspace=False)
 
-with open(args.ifile[0], newline='')  as f:
-    reader = csv.reader(itertools.islice(f,args.skip,None), dialect='asd')
-    try:
-        data=list(reader)
-    except csv.Error as e:
-        sys.exit('file {}, line {}: {}'.format(filename, reader.line_num, e))
 
+#reader = csv.reader(itertools.islice(f,args.skip,None), dialect='asd')
+try:
+    with open(args.ifile[0], newline='')  as f:
+        rawdata=f.readlines()
+        f.close()
+    if not rawdata:
+        sys.exit(('No data in file ' + f)
+except IOError as e:
+    sys.exit('I/O error: file {}: {}'.format(args.ifile[0], e))
+except:
+    print('Unexpected error:', sys.exc_info()[0]
+
+strippeddata = map(str.strip, rawdata)
+data = [line.split() for line in strippeddata]
+
+print(data)
