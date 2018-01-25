@@ -21,78 +21,109 @@ parser = argparse.ArgumentParser(prog='continuum_removal.py',
         description='''This program takes a delimited text file containing\
         x and y values and fits a line from y(xstart) to y(xstop) and\
         normalizes all y data such that the linear fit line is at a value\
-        of 1.''', epilog='''For more information, contact Chip at\
-        carey.legett@stonybrook.edu.''')
+        of 1. It the writes an output file as a CSV containing "x, [y,]\
+        [continuum,] cont_removed_y" data.''', epilog='''For more information\
+        contact Chip at carey.legett@stonybrook.edu.''')
 parser.add_argument('-f', '--input-file', required=True, help='''The\
         name of the input file (include path if the file is not in this\
         directory).''', dest='ifile')
-parser.add_argument('-o', '--output-file', nargs='?', default='output.txt', 
-        help='''The name of the output file (include path if you want the file\
-        somewhere other than in the current directory). Defaults to \
-        output.txt.''', dest='ofile')
 parser.add_argument('-a', '--xstart', type=int, required=True,
         help='The x value at which to begin the continuum calculation.', 
         dest='xa')
 parser.add_argument('-b', '--xstop', type=int, required=True,
         help='The x value at which to end the continuum calculation.', 
         dest='xb')
-parser.add_argument('-d', '--delimiter', default=',', help='''The\
-        delimiter for the input file. w for whitespace, or a single character
-        representing the actual delimiter.''', 
+group = parser.add_mutually_exclusive_group(required=True)
+group.add_argument('-d', '--delimiter', help='''The\
+        delimiter for the input file. A single character representing the\ 
+        actual delimiter. Mutually exclusive with -w or --whitespace''', 
         dest='delim')
-parser.add_argument('-n', '--start-line', nargs='?', default=0, help='''Skip\
+group.add_argument('-w', '--whitespace', help='''Indicates the delimiter is \
+        either tabs or spaces. Mutually exclusive with -d or --delimiter.''',
+        action='store_true', dest='whitespace')
+parser.add_argument('-n', '--skip-lines', default=0, help='''Skip\
         this many lines of the input file before reading in data.''', type=int,
         dest='skip')
+parser.add_argument('-o', '--output-file', nargs='?', default='output.txt', 
+        help='''The name of the output file (include path if you want the file\
+        somewhere other than in the current directory). Defaults to \
+        output.txt.''', dest='ofile')
+parser.add_argument('-i', '--include-input', action='store_true', dest='i',
+        help='Write the original input data before the (optional) continuum \
+        fit and continuum removed data.')
+parser.add_argument('-c', '--continuum-output', action='store_true', dest='c',
+        help='Write the continuum fit for each input x value after the\
+        (optional) original input data and before the continuum removed data.')
+parser.add_argument('-v', '--verbose', action='store_true', dest='v', 
+        help='Give status information during processing.')
 
 args = parser.parse_args()
 
+if args.v: print('Reading input file...')
+
 try:
     with open(args.ifile, newline='') as infile:
-        if args.delim == 'w':
+        if args.whitespace:
             rawdata=[line.split() for line in itertools.islice(infile,args.skip,
                 None)]
-        elif len(args.delim) == 1:
-            rawdata=[line.split(args.delim) for line in \
-                itertools.isslice(infile, args.skip, None)]
         else:
-            sys.exit('''Bad delimiter option "{}". Please run with -h option for
-            help.'''.format(args.delim))
+            rawdata=[line.split(args.delim) for line in \
+                itertools.islice(infile, args.skip, None)]
     if not rawdata:
         sys.exit('No data in file ' + infile)
 except IOError as e:
-    sys.exit('I/O error: file {}: {}'.format(args.ifile[0], e))
+    sys.exit('I/O error: file {}: {}'.format(args.ifile, e))
 except:
-    sys.exit('Unexpected error: {}'.format(sys.exc_info()[0]))
+    sys.exit('Unexpected error: {}'.format(sys.exc_info()))
 
 try:
     data = [[float(astring) for astring in inner] for inner in rawdata]
 except:
-    sys.exit('''Converting strings to floats failed. Check input data. Error:\
-    {}'''.format(sys.exc_info()[0]))
+    sys.exit('''Converting strings to floats failed. Check input data and\
+    delimiter. Error: {}'''.format(sys.exc_info()))
 
+if args.v: print('Calculating continuum line')
 
 startx=float(args.xa)
 stopx=float(args.xb)
 starty=data[args.xa-int(data[0][0])][1]
 stopy=data[args.xb-int(data[0][0])][1]
 
-print('Start: (' + str(startx) + ',' + str(starty) + ')')
-print('Stop: (' + str(stopx) + ',' + str(stopy) + ')')
+if args.v: 
+    print('Start: (' + str(startx) + ',' + str(starty) + ')')
+    print('Stop: (' + str(stopx) + ',' + str(stopy) + ')')
 
 slope=(stopy-starty)/(stopx-startx)
 intercept=starty-(slope*startx)
 
-print('Continuum equation: y=' + str(slope) + '*x+' + str(intercept))
+if args.v:
+    print('Continuum equation: y=' + str(slope) + '*x+' + str(intercept))
+    print('Removing continuum')
 
-for i in range(len(data)):
-    continuum=slope*data[i][0]+intercept
-    data[i].extend([continuum])
-    data[i].extend([data[i][1]/continuum])
+output = []
+for element in data:
+    continuum=slope*element[0]+intercept
+    tempoutput = []
+    tempoutput.extend(element[0])
+    if args.i:
+        tempoutput.extend([element[1]])
+    if args.c: 
+        tempoutput.extend([continuum])
+    tempoutput.extend([element[1]/continuum])
+    output.append(tempoutput)
+
+if args.v: print('Writing output file')
 
 try:
     with open(args.ofile, 'w', newline='') as outfile:
         writer = csv.writer(outfile)
-        writer.writerow(['x','original','continuum','cont_removed'])
-        writer.writerows(data)
+        header = ['x']
+        if args.i:
+            header.extend(['original'])
+        if args.c:
+            header.extend(['continuum'])
+        header.extend(['cont_removed'])
+        writer.writerow(header)
+        writer.writerows(output)
 except:
-   sys.exit('Output file error: {}'.format(sys.exc_info()[0]))
+   sys.exit('Output file error: {}'.format(sys.exc_info()))
