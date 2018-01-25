@@ -103,8 +103,7 @@ if args.v:
 output = []
 for element in data:
     continuum=slope*element[0]+intercept
-    tempoutput = []
-    tempoutput.extend(element[0])
+    tempoutput = [element[0]]
     if args.i:
         tempoutput.extend([element[1]])
     if args.c: 
