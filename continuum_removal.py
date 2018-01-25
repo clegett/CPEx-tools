@@ -118,10 +118,10 @@ try:
         writer = csv.writer(outfile)
         header = ['x']
         if args.i:
-            header.extend(['original'])
+            header.append('original')
         if args.c:
-            header.extend(['continuum'])
-        header.extend(['cont_removed'])
+            header.append('continuum')
+        header.append('cont_removed')
         writer.writerow(header)
         writer.writerows(output)
 except:
