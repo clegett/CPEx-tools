@@ -61,8 +61,17 @@ args = parser.parse_args()
 
 if args.v: print('Reading input file...')
 
+if sys.version_info[0] == 2:
+    raccess = 'rb'
+    waccess = 'wb'
+    kwargs = {}
+else:
+    raccess = 'rt'
+    waccess = 'w'
+    kwargs = {'newline':''}
+
 try:
-    with open(args.ifile, newline='') as infile:
+    with open(args.ifile, raccess, **kwargs) as infile:
         if args.whitespace:
             rawdata=[line.split() for line in itertools.islice(infile,args.skip,
                 None)]
@@ -114,7 +123,7 @@ for element in data:
 if args.v: print('Writing output file')
 
 try:
-    with open(args.ofile, 'w', newline='') as outfile:
+    with open(args.ofile, waccess, **kwargs) as outfile:
         writer = csv.writer(outfile)
         header = ['x']
         if args.i:
