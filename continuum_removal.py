@@ -22,7 +22,7 @@ __credits__ = ['Carey Legett']
 __version__ = '1.0'
 __maintainer__ = 'Carey Legett'
 __email__ = 'carey.legett@stonybrook.edu'
-__status__ = 'Development'
+__status__ = 'Production'
 
 def parse_cmdln_args():
     """A function to parse command line arguments for this module.
