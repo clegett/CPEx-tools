@@ -7,8 +7,8 @@ the data such that the linear fit has a value of 1. Output writes to a CSV file
 with two to four columns: "x, [y,] [continuum,] continuum_removed_y" as
 controlled by command line arguments.
 
-Args
 """
+
 import argparse
 import sys
 import itertools
@@ -25,6 +25,26 @@ __email__ = 'carey.legett@stonybrook.edu'
 __status__ = 'Development'
 
 def parse_cmdln_args():
+    """A function to parse command line arguments for this module.
+    
+    This function is used when this module is run as a script to parse
+    commandline arguments into the appropriate variables. It also provides
+    useage help information when run with the -h flag.
+    
+    Example:
+        To invoke the help text and get information about the proper command
+        line flags, run the script with the -h or --help flags.
+
+        $ python3 continuum_removal.py -h
+        or
+        $ python3 continuum_removal.py --help
+    
+    Returns:
+        args (argparse.Namespace): An object containing the state of the
+        variables set via command line options. Individual elements are
+        accessible with standard `args.element`_ notation.
+    
+    """
 
     parser = argparse.ArgumentParser(prog='continuum_removal.py',
             description=__doc__, epilog='''For more information\
@@ -64,11 +84,40 @@ def parse_cmdln_args():
     
     return(parser.parse_args())
 
-
 def read_input_file(input_filename, input_delimiter, whitespace_flag, 
                     lines_to_skip, verbose_flag):
+    """Reads the specified input file and returns a list of the data therein.
+
+    This function reads an input file using a specified delimiter, skipping a
+    given number of lines before reading. It also accepts a verbosity flag to
+    enable some progress text while reading.
+
+    Args:
+        input_filename (str): The file to be read
+        input_delimiter (str): The delimiter used in the input file. Set this
+            to `None` if the delimiter is some form of whitespace. 
+        whitespace_flag (bool): True if the delimiter is some form of
+            whitespace, False otherwise. Must be false if `input_delimiter` is
+            not `None`.
+        lines_to_skip (int): The number of lines to skip at the beginning of
+            the file before ingesting data. 
+        verbose_flag (bool): True for progress output, False otherwise.
+
+    Returns:
+        data ([float,float]): A list of lists of floats containing the data
+            read in from the input file.
+
+    Raises:
+        IOError: if there is a problem opening or reading the input file
+        ValueError: if the data that is read from the file cannot be converted
+            to a float. (e.g. the read data is not numeric)
+
+    """
     if verbose_flag: print('Reading input file...')
-    
+
+
+    # Check for the version of python being used and use appropriate flags for
+    # opening the input file as necessary
     if sys.version_info[0] == 2:
         raccess = 'rb'
         kwargs = {}
@@ -94,12 +143,43 @@ def read_input_file(input_filename, input_delimiter, whitespace_flag,
     try:
         data = [[float(astring) for astring in inner] for inner in rawdata]
     except:
+        # This is most likely to occur in the even that the data read from the
+        # input file is not numeric. It could also happen if the delimiter was
+        # not correctly specified.
         sys.exit('''Converting strings to floats failed. Check input data and\
         delimiter. Error: {}'''.format(sys.exc_info()))
 
     return(data)
 
 def remove_continuum(data, xa, xb, verbose_flag):
+    """A function to remove the linear continuum between two points.
+    
+    This function takes a list of lists of floats containing x,y data, a
+    starting x value, and an ending x value and calculates a linear fit to the
+    data at those two points, extrapolated over the provided domain of x. The
+    data is then normalized such that the calculated continuum equals 1. This
+    can be used to prepare data for analyses such as measuring the band depth
+    of absorptions in spectroscopic data.
+    
+    Args:
+        data ([float, float]): A list of lists of two floats representing the
+            unnormalized initial data.
+        xa (float): The value of x at which to start the linear fit. This
+            must be an x value contained in the data list since no searching
+            for nearest values is performed.
+        xb (float): The value of x at which to stop the linear fit. This must
+            be an x value contained in the data list since no searching for 
+            nearest values is performed.
+        verbose_flag (bool): True for progress output, False otherwise.
+        
+    Returns:
+        output ([float, float]): A list of lists of two to four floats. The
+            first element in each inner list will be the input x value. The 
+            second element will be the input y value.  The third element will 
+            be the continuum value calculated for that x. The last element 
+            will be the continuum-removed y data.
+    
+    """
     if args.v: print('Calculating continuum line')
     
     startx=xa
@@ -122,16 +202,39 @@ def remove_continuum(data, xa, xb, verbose_flag):
     for element in data:
         continuum=slope*element[0]+intercept
         tempoutput = [element[0]]
-        if args.i:
-            tempoutput.append(element[1])
-        if args.c: 
-            tempoutput.append(continuum)
+        tempoutput.append(element[1])
+        tempoutput.append(continuum)
         tempoutput.append(element[1]/continuum)
         output.append(tempoutput)
 
     return(output)
 
-def write_cont_removed_output(output, output_filename, verbose_flag):
+def write_cont_removed_output(output, output_filename, write_input_flag,
+                              write_cont_flag, verbose_flag):
+    """A function to write the provided list of lists of floats to a CSV file.
+    
+    This function writes the continuum removed data to a CSV file. Depending on
+    the arguments passed, it may also write the original input data, and the
+    calculated continuum for each x value.
+    
+    Args:
+        output ([float, float, float, float]): A list of lists of four floats
+            that will be written, in part or in whole to the output file.
+        output_filename (str): The name of the output file.
+        write_input_flag (bool): True if we want to include the original data
+            in the output file, False otherwise.
+        write_cont_flag (bool): True if we want to include the value of the
+            continuum at each x value in the output file, False otherwise.
+        verbose_flag (bool): True for progress message, False otherwise.
+    
+    Raises:
+        IOError: For any problem opening or writing to the output file.
+    
+    Output:
+        A CSV file containing two to four columns of data as selected with the
+            arguments passed to the function.
+
+"""
     if verbose_flag: print('Writing output file')
     
     if sys.version_info[0] == 2:
@@ -145,13 +248,25 @@ def write_cont_removed_output(output, output_filename, verbose_flag):
         with open(output_filename, waccess, **kwargs) as outfile:
             writer = csv.writer(outfile)
             header = ['x']
-            if args.i:
+            filtered_output = []
+
+            for line in output:
+                temp = [line[0]]
+                if write_input_flag:
+                    temp.append(line[1])
+                if write_cont_flag:
+                    temp.append(line[2])
+                temp.append(line[3])
+                filtered_output.append(temp)
+
+            if write_input_flag:
                 header.append('original')
-            if args.c:
+            if write_cont_flag:
                 header.append('continuum')
             header.append('cont_removed')
+
             writer.writerow(header)
-            writer.writerows(output)
+            writer.writerows(filtered_output)
     except:
        sys.exit('Output file error: {}'.format(sys.exc_info()))
 
@@ -160,4 +275,4 @@ if __name__ == '__main__':
     data = read_input_file(args.ifile, args.delim, args.whitespace, args.skip,
                            args.v)
     output = remove_continuum(data, float(args.xa), float(args.xb), args.v)
-    write_cont_removed_output(output, args.ofile, args.v)
+    write_cont_removed_output(output, args.ofile, args.i, args.c, args.v)
