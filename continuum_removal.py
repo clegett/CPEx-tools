@@ -236,7 +236,9 @@ def write_cont_removed_output(output, output_filename, write_input_flag,
 
 """
     if verbose_flag: print('Writing output file')
-    
+
+    # Check for the version of python being used and use appropriate flags for
+    # opening the input file as necessary
     if sys.version_info[0] == 2:
         waccess = 'wb'
         kwargs = {}
