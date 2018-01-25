@@ -105,10 +105,10 @@ for element in data:
     continuum=slope*element[0]+intercept
     tempoutput = [element[0]]
     if args.i:
-        tempoutput.extend([element[1]])
+        tempoutput.append(element[1])
     if args.c: 
-        tempoutput.extend([continuum])
-    tempoutput.extend([element[1]/continuum])
+        tempoutput.append(continuum)
+    tempoutput.append(element[1]/continuum)
     output.append(tempoutput)
 
 if args.v: print('Writing output file')
