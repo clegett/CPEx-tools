@@ -3,7 +3,8 @@
 
 """
 
-import os
+import attr
+import numpy as np
 
 __author__ = 'Carey Legett'
 __copyright__ = 'Copyright 2018, Stony Brook University'
@@ -30,4 +31,12 @@ class Pack:
 
 
     """
+    
+    dims = None
+    num_of_particles = None
+    dispersity = None
+    sphere_radius = None
+    sphere_coords = [[None,None,None]]
+
+
 
