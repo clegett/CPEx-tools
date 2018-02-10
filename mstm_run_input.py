@@ -59,8 +59,10 @@ class Pack:
         for line in rawfile:
             lines.append(line.split())
 
-        return(cls(lines[0][0], lines[1][0], lines[1][1]), lines[3][0],
-                   lines[6:])
+        coords = [[float(item) for item in row] for row in lines[6:]]
+
+        return(cls(int(lines[0][0]), int(lines[1][0]), int(lines[1][1]),
+                   float(lines[3][0]), coords))
 
     def center_pack(self):
         xtotal = 0
@@ -83,3 +85,4 @@ class Pack:
         multiplier = new_sphere_radius / self.sphere_radius
         self.sphere_coords = [[coord * multiplier for coord in row] for row in
             self.sphere_coords]
+        self.sphere_radius = new_sphere_radius

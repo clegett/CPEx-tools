@@ -12,7 +12,6 @@ Classes:
 
 import math
 import attr
-import numpy
 import random
 
 class Sphere:
