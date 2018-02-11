@@ -13,6 +13,7 @@ Classes:
 import math
 import attr
 import random
+import sys
 
 class Sphere:
     """A class describing the spheres used in the MSTM model
@@ -398,7 +399,7 @@ class Pack:
             ytotal += line[1]
             ztotal += line[2]
         length = len(self.sphere_coords)
-        avg = [xtotal/length, ytotal/length, ztotal/length]
+        avgs = [xtotal/length, ytotal/length, ztotal/length]
         self.sphere_coords = [[element - avg for element, avg in zip(line,
             avgs)] for line in self.sphere_coords]
 
