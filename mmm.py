@@ -244,7 +244,7 @@ class Grain:
                     break
                 j += 1
             else:
-                cinclusions.append(Sphere(r_incl,this_x,this_y,this_z))
+                cinclusions.append(Sphere(this_x,this_y,this_z,r_incl))
                 cnum_inclusions += 1
 
         return cls(host_sphere=chost_sphere, rim=crim,
@@ -271,7 +271,29 @@ class Grain:
             inclusion.y += dy
             inclusion.z += dz
 
-    # weight percent inclusions?
+    def set_grain_oc(self, host_n, host_k, rim_n, rim_k, incl_n, incl_k):
+        self.host_sphere.n = host_n
+        self.host_sphere.k = host_k
+        self.rim.n = rim_n
+        self.rim.k = rim_k
+        for inclusion in self.inclusions:
+            inclusion.n = incl_n
+            inclusion.k = incl_k
+
+    def print_rxyznk(self, tofile=sys.stdout):
+        print(str(self.host_sphere.r) + '\t' + str(self.host_sphere.x) + '\t'
+              + str(self.host_sphere.y) + '\t' + str(self.host_sphere.z) + 
+              '\t' + str(self.host_sphere.n) + '\t' + 
+              str(self.host_sphere.k), file=tofile)
+
+        print(str(self.rim.r) + '\t' + str(self.rim.x) + '\t' +
+              str(self.rim.y) + '\t' + str(self.rim.z) + '\t' +
+              str(self.rim.n) + '\t' + str(self.rim.k), file=tofile)
+    
+        for inclusion in self.inclusions:
+            print(str(inclusion.r) + '\t' + str(inclusion.x) + '\t' +
+                  str(inclusion.y) + '\t' + str(inclusion.z) + '\t' +
+                  str(inclusion.n) + '\t' + str(inclusion.k), file=tofile)
 
 
 @attr.s
