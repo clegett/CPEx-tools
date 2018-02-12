@@ -173,9 +173,6 @@ class ModelOptions:
                     output = output + key + "\n" + str(self.__dict__[key])
             return output
         elif setname == "required":
-            #
-            # if fixed_or_random_orientation == 1
-            # t_matrix_file
             for key in required_keys:
                 if len(output) != 0:
                     output = output + "\n"
