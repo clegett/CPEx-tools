@@ -6,12 +6,12 @@ import sys
 RHOST = 500
 DRRIM = 100
 RINCL = 10
-NINCL = 100
-mypack = mmm.Pack.from_file('example_input/100.dat')
+NINCL = 800
+mypack = mmm.Pack.from_file('example_input/10.dat')
 ocfile = 'example_input/rerun_oc.csv'
 
 cpumodel = 'bro'
-nodes = 10
+nodes = 100
 tpn = 28
 walltime = '1:59:00'
 
@@ -80,14 +80,14 @@ pbsfile = outdir + runname + '.pbs'
 try:
     with open(pbsfile, 'w') as pbs:
         print('#PBS -N ' + runname, file=pbs)
-        print('#PBS -q normal', file=pbs)
+        print('#PBS -q devel', file=pbs)
         print('#PBS -l select=' + str(nodes) + ':ncpus=' + str(tpn) + 
               ':mpiprocs=' + str(tpn) + ':model=' + cpumodel, file=pbs)
         print('#PBS -l walltime=' + walltime, file=pbs)
         print('#PBS -e ' + runoutputdir + runname + '.err', file=pbs)
         print('#PBS -o ' + runoutputdir + runname + '.out', file=pbs)
         print('#PBS -M carey.legett@stonybrook.edu', file=pbs)
-        print('#PBS -abe', file=pbs)
+        print('#PBS -m abe', file=pbs)
         print('', file=pbs)
         print('module load comp-intel/2016.2.181 mpi-sgi/mpt', file=pbs)
         print('', file=pbs)
