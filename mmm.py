@@ -190,7 +190,7 @@ class ModelOptions:
             return output
         elif setname == "required-and-non-defaults":
             for key in self.__dict__:
-                if self.is_default(key) or key in required_keys:
+                if not self.is_default(key) or key in required_keys:
                     if len(output) != 0:
                         output = output + "\n"
                     output = output + key + "\n" + str(self.__dict__[key])
