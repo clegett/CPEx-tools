@@ -10,6 +10,7 @@ NINCL = 800
 mypack = mmm.Pack.from_file('example_input/10.dat')
 ocfile = 'example_input/rerun_oc.csv'
 
+queue = 'devel'
 cpumodel = 'bro'
 nodes = 100
 tpn = 28
@@ -80,7 +81,7 @@ pbsfile = outdir + runname + '.pbs'
 try:
     with open(pbsfile, 'w') as pbs:
         print('#PBS -N ' + runname, file=pbs)
-        print('#PBS -q devel', file=pbs)
+        print('#PBS -q ' + queue, file=pbs)
         print('#PBS -l select=' + str(nodes) + ':ncpus=' + str(tpn) + 
               ':mpiprocs=' + str(tpn) + ':model=' + cpumodel, file=pbs)
         print('#PBS -l walltime=' + walltime, file=pbs)
@@ -97,7 +98,7 @@ try:
         print('', file=pbs)
         print('cd $PBS_O_WORKDIR', file=pbs)
         print('', file=pbs)
-        print('mpiexec -np ' + str(nodes * tpn) + './mstm_ttv2.3.exe ' +
+        print('mpiexec -np ' + str(nodes * tpn) + ' ./mstm_ttv2.3.exe ' +
                 runname + '.inp', file=pbs)
         print('mv ~/' + runname + '* ' + runoutputdir, file=pbs)
 except IOError as e:

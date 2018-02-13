@@ -224,8 +224,8 @@ class Grain:
             phi = math.acos(2 * random.random()-1)
 
             arandom = random.random()
-            r = ((dr_rim - r_incl - 0.0002) * arandom) + ((r_host + r_incl) +
-                    0.0001)
+            r = ((dr_rim - r_incl - 0.0004) * arandom) + ((r_host + r_incl) +
+                    0.0002)
             this_x = r * math.cos(theta) * math.sin(phi)
             this_y = r * math.sin(theta) * math.sin(phi)
             this_z = r * math.cos(phi)
@@ -237,7 +237,8 @@ class Grain:
                         cinclusions[j].z)
                 distance = math.sqrt(sum([(a - b) ** 2 for a, b in zip(p1,
                     p2)]))
-                if distance <= (2 * r_incl):
+                if distance <= (2.01 * r_incl):
+                    print('too close!!' + str(cnum_inclusions))
                     break
                 j += 1
             else:
@@ -405,9 +406,9 @@ class Pack:
             lines.append(line.split())
 
         coords = [[float(item) for item in row] for row in lines[6:]]
-
+        print(coords)
         return(cls(int(lines[0][0]), int(lines[1][0]), int(lines[1][1]),
-                   float(lines[3][0]), coords))
+                   float(lines[3][0])/2, coords))
 
     def center_pack(self):
         xtotal = 0
