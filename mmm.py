@@ -298,7 +298,7 @@ class Grain:
 class Cluster:
     grainlist = attr.ib(default=None)
 
-    def get_bounding_sphere():
+    def get_bounding_sphere(self):
     # max distance between grain centers + 2*rim_r
     # centered on midpoint between grain centers if r1=r2
         max_distance = 0
@@ -338,7 +338,7 @@ class Cluster:
                         center[1] = (grain_a.host.y + grain_b.host.y) / 2
                         center[2] = (grain_a.host.z + grain_b.host.z) / 2
 
-        return(mmm.Sphere(center[0],center[1],center[2],(max_distance/2)))
+        return(Sphere(center[0],center[1],center[2],(max_distance/2)))
 
     def get_packing_fraction(self):
         vol_of_grains = 0
@@ -356,11 +356,11 @@ class Cluster:
         return vol_of_grains/vol_of_bounding_sphere
 
     # geometric cross section
-    def get_geom_xsection():
+    def get_geom_xsection(self):
         bounding_sphere = self.get_bounding_sphere()
         return math.pi * bounding_sphere.r ** 2
 
-    def check_overlap():
+    def check_overlap(self):
         overlap = False
         for grain_a in self.grainlist:
             for grain_b in self.grainlist:
