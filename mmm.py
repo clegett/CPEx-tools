@@ -226,9 +226,9 @@ class Grain:
             arandom = random.random()
             r = ((dr_rim - r_incl - 0.0004) * arandom) + ((r_host + r_incl) +
                     0.0002)
-            this_x = r * math.cos(theta) * math.sin(phi)
-            this_y = r * math.sin(theta) * math.sin(phi)
-            this_z = r * math.cos(phi)
+            this_x = (r * math.cos(theta) * math.sin(phi)) + x
+            this_y = (r * math.sin(theta) * math.sin(phi)) + y
+            this_z = (r * math.cos(phi)) + z
 
             j = 0
             while j < cnum_inclusions:

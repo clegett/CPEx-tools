@@ -6,8 +6,8 @@ import sys
 RHOST = 500
 DRRIM = 100
 RINCL = 10
-NINCL = 2
-mypack = mmm.Pack.from_file('example_input/test.dat')
+NINCL = 100
+mypack = mmm.Pack.from_file('example_input/10.dat')
 ocfile = 'example_input/rerun_oc.csv'
 
 queue = 'devel'
@@ -40,6 +40,10 @@ mycluster = mmm.Cluster()
 mycluster.grainlist = []
 
 for sphere in mypack.sphere_coords:
+    print(sphere)
+    print(sphere[0])
+    print(sphere[1])
+    print(sphere[2])
     mycluster.grainlist.append(mmm.Grain.new_grain(sphere[0], sphere[1],
     sphere[2], RHOST, DRRIM, RINCL, NINCL))
 
