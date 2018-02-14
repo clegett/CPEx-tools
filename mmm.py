@@ -88,10 +88,10 @@ class Sphere:
 
         """
         if another_sphere is None:
-            return sqrt(
+            return math.sqrt(
                 (self.x - x1) ** 2 + (self.y - y1) ** 2 + (self.z - z1) ** 2)
         else:
-            return (sqrt( (self.x - another_sphere.x) ** 2 + (self.y -
+            return (math.sqrt( (self.x - another_sphere.x) ** 2 + (self.y -
                 another_sphere.y) ** 2 + (self.z - another_sphere.z) ** 2))
 
     def geom_x_sec(self):
@@ -252,9 +252,9 @@ class Grain:
 
     # move grain
     def move_to(self, x, y, z):
-        old_x = host_sphere.x
-        old_y = host_sphere.y
-        old_z = host_sphere.z
+        old_x = self.host_sphere.x
+        old_y = self.host_sphere.y
+        old_z = self.host_sphere.z
         dx = x - old_x
         dy = y - old_y
         dz = z - old_z
@@ -264,7 +264,7 @@ class Grain:
         self.rim.x += dx
         self.rim.y += dy
         self.rim.z += dz
-        for inclusion in inclusions:
+        for inclusion in self.inclusions:
             inclusion.x += dx
             inclusion.y += dy
             inclusion.z += dz
@@ -280,14 +280,14 @@ class Grain:
 
     def print_rxyznk(self, tofile=sys.stdout):
         print(str(self.host_sphere.r) + '\t' + str(self.host_sphere.x) + '\t'
-              + str(self.host_sphere.y) + '\t' + str(self.host_sphere.z) + 
-              '\t' + str(self.host_sphere.n) + '\t' + 
+              + str(self.host_sphere.y) + '\t' + str(self.host_sphere.z) +
+              '\t' + str(self.host_sphere.n) + '\t' +
               str(self.host_sphere.k), file=tofile)
 
         print(str(self.rim.r) + '\t' + str(self.rim.x) + '\t' +
               str(self.rim.y) + '\t' + str(self.rim.z) + '\t' +
               str(self.rim.n) + '\t' + str(self.rim.k), file=tofile)
-    
+
         for inclusion in self.inclusions:
             print(str(inclusion.r) + '\t' + str(inclusion.x) + '\t' +
                   str(inclusion.y) + '\t' + str(inclusion.z) + '\t' +
@@ -306,32 +306,32 @@ class Cluster:
         for grain_a in self.grainlist:
             for grain_b in self.grainlist:
                 if ((grain_a.rim is not None) and (grain_b.rim is not None)):
-                    distance = (grain_a.rim.distance_to(grain_b.rim) +
-                        grain_a.rim.r + grain_b.rim.r)
+                    distance = (grain_a.rim.distance_from(another_sphere =
+                        grain_b.rim) + grain_a.rim.r + grain_b.rim.r)
                     if (distance > max_distance):
                         max_distance = distance
                         center[0] = (grain_a.rim.x + grain_b.rim.x) / 2
                         center[1] = (grain_a.rim.y + grain_b.rim.y) / 2
                         center[2] = (grain_a.rim.z + grain_b.rim.z) / 2
                 elif ((grain_a.rim is not None) and (grain_b.rim is None)):
-                    distance = (grain_a.rim.distance_to(grain_b.host) +
-                        grain_a.rim.r + grain_b.host.r)
+                    distance = (grain_a.rim.distance_from(another_sphere =
+                        grain_b.host) + grain_a.rim.r + grain_b.host.r)
                     if (distance > max_distance):
                         max_distance = distance
                         center[0] = (grain_a.rim.x + grain_b.host.x) / 2
                         center[1] = (grain_a.rim.y + grain_b.host.y) / 2
                         center[2] = (grain_a.rim.z + grain_b.host.z) / 2
                 elif ((grain_a.rim is None) and (grain_b.rim is not None)):
-                    distance = (grain_a.host.distance_to(grain_b.rim) +
-                        grain_a.host.r + grain_b.rim.r)
+                    distance = (grain_a.host.distance_from(another_sphere =
+                        grain_b.rim) + grain_a.host.r + grain_b.rim.r)
                     if (distance > max_distance):
                         max_distance = distance
                         center[0] = (grain_a.host.x + grain_b.rim.x) / 2
                         center[1] = (grain_a.host.y + grain_b.rim.y) / 2
                         center[2] = (grain_a.host.z + grain_b.rim.z) / 2
                 elif ((grain_a.rim is None) and (grain_b.rim is None)):
-                    distance = (grain_a.host.distance_to(grain_b.host) +
-                        grain_a.host.r + grain_b.host.r)
+                    distance = (grain_a.host.distance_from(another_sphere =
+                        grain_b.host) + grain_a.host.r + grain_b.host.r)
                     if (distance > max_distance):
                         max_distance = distance
                         center[0] = (grain_a.host.x + grain_b.host.x) / 2
@@ -355,11 +355,26 @@ class Cluster:
 
         return vol_of_grains/vol_of_bounding_sphere
 
-
     # geometric cross section
     def get_geom_xsection():
         bounding_sphere = self.get_bounding_sphere()
         return math.pi * bounding_sphere.r ** 2
+
+    def check_overlap():
+        overlap = False
+        for grain_a in self.grainlist:
+            for grain_b in self.grainlist:
+                if grain_a is not grain_b:
+                    hrlist = [grain_a.host, grain_a.rim, grain_b.host,
+                            grain_b.rim]
+                    for item_a in hrlist:
+                        for item_b in hrlist:
+                            if item_a is not item_b:
+                                if (item_a.distance_from(another_sphere =
+                                    item_b) <= (item_a.r + item_b.r)):
+                                    overlap = True
+                    for incl in grain_a.inclusions:
+                        pass
 
 class Pack:
     """A class containing the data generated by a PackLSD run.
@@ -406,7 +421,7 @@ class Pack:
             lines.append(line.split())
 
         coords = [[float(item) for item in row] for row in lines[6:]]
-        print(coords)
+
         return(cls(int(lines[0][0]), int(lines[1][0]), int(lines[1][1]),
                    float(lines[3][0])/2, coords))
 
@@ -425,6 +440,11 @@ class Pack:
 
     def rescale_pack(self, new_sphere_radius):
         multiplier = new_sphere_radius / self.sphere_radius
+        print('nsr:' + str(new_sphere_radius))
+        print('ssr:' + str(self.sphere_radius))
+        print('multiplier:' + str(multiplier))
+        print('sphere_coords:' + str(self.sphere_coords))
         self.sphere_coords = [[coord * multiplier for coord in row] for row in
             self.sphere_coords]
+        print('new_shere_coords:' + str(self.sphere_coords))
         self.sphere_radius = new_sphere_radius

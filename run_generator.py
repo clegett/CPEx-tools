@@ -6,8 +6,8 @@ import sys
 RHOST = 500
 DRRIM = 100
 RINCL = 10
-NINCL = 800
-mypack = mmm.Pack.from_file('example_input/10.dat')
+NINCL = 2
+mypack = mmm.Pack.from_file('example_input/test.dat')
 ocfile = 'example_input/rerun_oc.csv'
 
 queue = 'devel'
