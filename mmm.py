@@ -15,6 +15,7 @@ import attr
 import random
 import sys
 
+
 class Sphere:
     """A class describing the spheres used in the MSTM model
 
@@ -38,7 +39,7 @@ class Sphere:
 
     """
     def __init__(self, x, y, z, r, n=None, k=None, real_chiral=None,
-            imag_chiral=None, tmatrix_file=None):
+                 imag_chiral=None, tmatrix_file=None):
         """Constructor
 
         Note: x, y, z, and r must be in identical units
@@ -91,12 +92,13 @@ class Sphere:
             return math.sqrt(
                 (self.x - x1) ** 2 + (self.y - y1) ** 2 + (self.z - z1) ** 2)
         else:
-            return (math.sqrt( (self.x - another_sphere.x) ** 2 + (self.y -
-                another_sphere.y) ** 2 + (self.z - another_sphere.z) ** 2))
+            return (math.sqrt((self.x - another_sphere.x) ** 2 + (self.y -
+                    another_sphere.y) ** 2 + (self.z - another_sphere.z) ** 2))
 
     def geom_x_sec(self):
         """Return the geometric cross section of this sphere."""
         return math.pi * self.r ** 2
+
 
 @attr.s
 class ModelOptions:
@@ -153,17 +155,18 @@ class ModelOptions:
     t_matrix_convergence_epsilon = attr.ib(default=1e-6)
     sm_number_processors = attr.ib(default=10)
 
-    def is_default(self,name):
+    def is_default(self, name):
         return (getattr(self, name) ==
-            getattr(attr.fields(type(self)),name).default)
+                getattr(attr.fields(type(self)), name).default)
 
     def get_formatted(self, setname):
         output = ""
-        required_keys = [ "number_spheres", "sphere_position_file",
-            "length_scale_factor", "real_ref_index_scale_factor",
-            "imag_ref_index_scale_factor", "medium_real_ref_index",
-            "medium_imag_ref_index", "fixed_or_random_orientation",
-            "output_file", "run_print_file", "scattering_coefficient_file" ]
+        required_keys = \
+            ["number_spheres", "sphere_position_file",
+             "length_scale_factor", "real_ref_index_scale_factor",
+             "imag_ref_index_scale_factor", "medium_real_ref_index",
+             "medium_imag_ref_index", "fixed_or_random_orientation",
+             "output_file", "run_print_file", "scattering_coefficient_file"]
 
         if setname == "defaults":
             for key in self.__dict__:
@@ -179,7 +182,7 @@ class ModelOptions:
                 output = output + key + "\n" + str(self.__dict__[key])
             if self.__dict__['fixed_or_random_orientation'] == 1:
                 output = ("\n" + 't_matrix_file' + "\n" +
-                    self.__dict__['t_matrix_file'])
+                          self.__dict__['t_matrix_file'])
             return output
         elif setname == "non-defaults":
             for key in self.__dict__:
@@ -204,6 +207,7 @@ class ModelOptions:
         else:
             return False
 
+
 @attr.s
 class Grain:
     host_sphere = attr.ib(default=None)
@@ -214,9 +218,9 @@ class Grain:
     num_inclusions = attr.ib(default=None)
 
     @classmethod
-    def new_grain(cls,x,y,z,r_host,dr_rim,r_incl,n_incl):
-        chost_sphere = Sphere(x,y,z,r_host)
-        crim = Sphere(x,y,z,r_host+dr_rim)
+    def new_grain(cls, x, y, z, r_host, dr_rim, r_incl, n_incl):
+        chost_sphere = Sphere(x, y, z, r_host)
+        crim = Sphere(x, y, z, r_host + dr_rim)
         cnum_inclusions = 0
         cinclusions = []
         while cnum_inclusions < n_incl:
@@ -224,8 +228,8 @@ class Grain:
             phi = math.acos(2 * random.random()-1)
 
             arandom = random.random()
-            r = ((dr_rim - (2 * r_incl) - 0.0004) * arandom) + ((r_host + 
-                r_incl) + 0.0002)
+            r = ((dr_rim - (2 * r_incl) - 0.0004) * arandom) + \
+                ((r_host + r_incl) + 0.0002)
             this_x = (r * math.cos(theta) * math.sin(phi)) + x
             this_y = (r * math.sin(theta) * math.sin(phi)) + y
             this_z = (r * math.cos(phi)) + z
@@ -234,21 +238,20 @@ class Grain:
             while j < cnum_inclusions:
                 p1 = (this_x, this_y, this_z)
                 p2 = (cinclusions[j].x, cinclusions[j].y,
-                        cinclusions[j].z)
-                distance = math.sqrt(sum([(a - b) ** 2 for a, b in zip(p1,
-                    p2)]))
+                      cinclusions[j].z)
+                distance = math.sqrt(sum([(a - b) ** 2 for a, b in
+                                          zip(p1, p2)]))
                 if distance <= (2.01 * r_incl):
                     print('too close!!' + str(cnum_inclusions))
                     break
                 j += 1
             else:
-                cinclusions.append(Sphere(this_x,this_y,this_z,r_incl))
+                cinclusions.append(Sphere(this_x, this_y, this_z, r_incl))
                 cnum_inclusions += 1
 
         return cls(host_sphere=chost_sphere, rim=crim,
-                inclusions=cinclusions, host_radius = r_host, rim_thickness =
-                dr_rim, num_inclusions = cnum_inclusions)
-
+                   inclusions=cinclusions, host_radius=r_host,
+                   rim_thickness=dr_rim, num_inclusions=cnum_inclusions)
 
     # move grain
     def move_to(self, x, y, z):
@@ -299,46 +302,50 @@ class Cluster:
     grainlist = attr.ib(default=None)
 
     def get_bounding_sphere(self):
-    # max distance between grain centers + 2*rim_r
-    # centered on midpoint between grain centers if r1=r2
+        # max distance between grain centers + 2*rim_r
+        # centered on midpoint between grain centers if r1=r2
         max_distance = 0
         center = []
         for grain_a in self.grainlist:
             for grain_b in self.grainlist:
-                if ((grain_a.rim is not None) and (grain_b.rim is not None)):
-                    distance = (grain_a.rim.distance_from(another_sphere =
-                        grain_b.rim) + grain_a.rim.r + grain_b.rim.r)
-                    if (distance > max_distance):
+                if grain_a.rim is not None and grain_b.rim is not None:
+                    distance = (grain_a.rim.distance_from(
+                                another_sphere=grain_b.rim) + grain_a.rim.r +
+                                grain_b.rim.r)
+                    if distance > max_distance:
                         max_distance = distance
                         center[0] = (grain_a.rim.x + grain_b.rim.x) / 2
                         center[1] = (grain_a.rim.y + grain_b.rim.y) / 2
                         center[2] = (grain_a.rim.z + grain_b.rim.z) / 2
-                elif ((grain_a.rim is not None) and (grain_b.rim is None)):
-                    distance = (grain_a.rim.distance_from(another_sphere =
-                        grain_b.host) + grain_a.rim.r + grain_b.host.r)
-                    if (distance > max_distance):
+                elif grain_a.rim is not None and grain_b.rim is None:
+                    distance = (grain_a.rim.distance_from(
+                                another_sphere=grain_b.host) + grain_a.rim.r +
+                                grain_b.host.r)
+                    if distance > max_distance:
                         max_distance = distance
                         center[0] = (grain_a.rim.x + grain_b.host.x) / 2
                         center[1] = (grain_a.rim.y + grain_b.host.y) / 2
                         center[2] = (grain_a.rim.z + grain_b.host.z) / 2
-                elif ((grain_a.rim is None) and (grain_b.rim is not None)):
-                    distance = (grain_a.host.distance_from(another_sphere =
-                        grain_b.rim) + grain_a.host.r + grain_b.rim.r)
-                    if (distance > max_distance):
+                elif grain_a.rim is None and grain_b.rim is not None:
+                    distance = (grain_a.host.distance_from(
+                                another_sphere=grain_b.rim) + grain_a.host.r +
+                                grain_b.rim.r)
+                    if distance > max_distance:
                         max_distance = distance
                         center[0] = (grain_a.host.x + grain_b.rim.x) / 2
                         center[1] = (grain_a.host.y + grain_b.rim.y) / 2
                         center[2] = (grain_a.host.z + grain_b.rim.z) / 2
-                elif ((grain_a.rim is None) and (grain_b.rim is None)):
-                    distance = (grain_a.host.distance_from(another_sphere =
-                        grain_b.host) + grain_a.host.r + grain_b.host.r)
-                    if (distance > max_distance):
+                elif grain_a.rim is None and grain_b.rim is None:
+                    distance = (grain_a.host.distance_from(
+                                another_sphere=grain_b.host) + grain_a.host.r +
+                                grain_b.host.r)
+                    if distance > max_distance:
                         max_distance = distance
                         center[0] = (grain_a.host.x + grain_b.host.x) / 2
                         center[1] = (grain_a.host.y + grain_b.host.y) / 2
                         center[2] = (grain_a.host.z + grain_b.host.z) / 2
 
-        return(Sphere(center[0],center[1],center[2],(max_distance/2)))
+        return Sphere(center[0], center[1], center[2], max_distance/2)
 
     def get_packing_fraction(self):
         vol_of_grains = 0
@@ -360,21 +367,6 @@ class Cluster:
         bounding_sphere = self.get_bounding_sphere()
         return math.pi * bounding_sphere.r ** 2
 
-    def check_overlap(self):
-        overlap = False
-        for grain_a in self.grainlist:
-            for grain_b in self.grainlist:
-                if grain_a is not grain_b:
-                    hrlist = [grain_a.host, grain_a.rim, grain_b.host,
-                            grain_b.rim]
-                    for item_a in hrlist:
-                        for item_b in hrlist:
-                            if item_a is not item_b:
-                                if (item_a.distance_from(another_sphere =
-                                    item_b) <= (item_a.r + item_b.r)):
-                                    overlap = True
-                    for incl in grain_a.inclusions:
-                        pass
 
 class Pack:
     """A class containing the data generated by a PackLSD run.
@@ -404,7 +396,7 @@ class Pack:
             kwargs = {}
         else:
             raccess = 'rt'
-            kwargs = {'newline':''}
+            kwargs = {'newline': ''}
 
         try:
             with open(a_filename, raccess, **kwargs) as infile:
@@ -435,8 +427,8 @@ class Pack:
             ztotal += line[2]
         length = len(self.sphere_coords)
         avgs = [xtotal/length, ytotal/length, ztotal/length]
-        self.sphere_coords = [[element - avg for element, avg in zip(line,
-            avgs)] for line in self.sphere_coords]
+        self.sphere_coords = [[element - avg for element, avg in
+                               zip(line, avgs)] for line in self.sphere_coords]
 
     def rescale_pack(self, new_sphere_radius):
         multiplier = new_sphere_radius / self.sphere_radius
@@ -445,6 +437,6 @@ class Pack:
         print('multiplier:' + str(multiplier))
         print('sphere_coords:' + str(self.sphere_coords))
         self.sphere_coords = [[coord * multiplier for coord in row] for row in
-            self.sphere_coords]
+                              self.sphere_coords]
         print('new_shere_coords:' + str(self.sphere_coords))
         self.sphere_radius = new_sphere_radius
