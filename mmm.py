@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """ Classes for MSTM Model Manager's data model
 
-This module provides the classes necessaryfor the MVC "Model" portion of the
+This module provides the classes necessary for the MVC "Model" portion of the
 MSTM Model Manager program.
 
 Classes:
@@ -242,7 +242,6 @@ class Grain:
                 distance = math.sqrt(sum([(a - b) ** 2 for a, b in
                                           zip(p1, p2)]))
                 if distance <= (2.01 * r_incl):
-                    print('too close!!' + str(cnum_inclusions))
                     break
                 j += 1
             else:
@@ -379,7 +378,9 @@ class Pack:
 
     """
     def __init__(self, dims=None, num_of_particles=None, dispersity=None,
-                 sphere_radius=None, sphere_coords=[[None, None, None]]):
+                 sphere_radius=None, sphere_coords=None):
+        if sphere_coords is None:
+            sphere_coords = [[]]
         self.dims = dims
         self.num_of_particles = num_of_particles
         self.dispersity = dispersity
@@ -405,8 +406,6 @@ class Pack:
                 sys.exit('No data in file ' + a_filename)
         except IOError as e:
             sys.exit('I/O error: file {}: {}'.format(a_filename, e))
-        except:
-            sys.exit('Unexpected error: {}'.format(sys.exc_info()))
 
         lines = []
         for line in rawfile:
