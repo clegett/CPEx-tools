@@ -102,6 +102,7 @@ class Sphere:
 
 @attr.s
 class ModelOptions:
+    # Options related to sphere target specification
     number_spheres = attr.ib(default="")
     sphere_position_file = attr.ib(default="at_bottom")
     length_scale_factor = attr.ib(default=1)
@@ -114,6 +115,8 @@ class ModelOptions:
     medium_real_chiral_factor = attr.ib(default=0)
     medium_imag_chiral_factor = attr.ib(default=0)
     target_euler_angles_deg = attr.ib(default="0 0 0")
+
+    # Options related to numerical solution
     mie_epsilon = attr.ib(default=1e-6)
     translation_epsilon = attr.ib(default=1e-8)
     solution_epsilon = attr.ib(default=1e-8)
@@ -121,12 +124,16 @@ class ModelOptions:
     max_number_iterations = attr.ib(default=2000)
     near_field_translation_distance = attr.ib(default=1e6)
     store_translation_matrix = attr.ib(default=0)
+
+    # Global options related to incident field state and output files
     fixed_or_random_orientation = attr.ib(default=0)
     gaussian_beam_constant = attr.ib(default=0)
     gaussian_beam_focal_point = attr.ib(default="0 0 0")
     output_file = attr.ib(default="test.dat")
     run_print_file = attr.ib(default="run_print.dat")
     write_sphere_data = attr.ib(default=1)
+
+    # Options related to scattering matrix output
     incident_or_target_frame = attr.ib(default=0)
     min_scattering_angel_deg = attr.ib(default=0)
     max_scattering_angle_deg = attr.ib(default=180)
@@ -135,6 +142,8 @@ class ModelOptions:
     delta_scattering_angle_deg = attr.ib(default="")
     number_scattering_angles = attr.ib(default="")
     scattering_angle_file = attr.ib(default="")
+
+    # Options for fixed orientation calculations
     incident_azimuth_angle_deg = attr.ib(default=0)
     incident_polar_angle_deg = attr.ib(default=0)
     calculate_scattering_coefficients = attr.ib(default=1)
@@ -150,6 +159,8 @@ class ModelOptions:
     near_field_output_file = attr.ib(default="nf-temp.dat")
     near_field_output_data = attr.ib(default=1)
     plane_wave_epsilon = attr.ib(default=1e-3)
+
+    # Options for random orientation calculations
     calculate_t_matrix = attr.ib(default=1)
     t_matrix_file = attr.ib(default="tmatrix-temp.dat")
     t_matrix_convergence_epsilon = attr.ib(default=1e-6)
