@@ -100,6 +100,71 @@ class Sphere:
         return math.pi * self.r ** 2
 
 
+class ModelOption:
+    def __init__(self, name, value=None):
+        _defaults = {
+            'number_spheres': '',
+            'sphere_position_file': 'at_bottom',
+            'length_scale_factor': 1,
+            'real_ref_index_scale_factor': 1,
+            'imag_ref_index_scale_factor': 1,
+            'real_chiral_factor': 0,
+            'imag_chiral_factor': 0,
+            'medium_real_ref_index': 1,
+            'medium_imag_ref_index': 0,
+            'medium_real_chiral_factor': 0,
+            'medium_imag_chiral_factor': 0,
+            'target_euler_angles_deg': [0, 0, 0],
+            'mie_epsilon': 1e-6,
+            'translation_epsilon': 1e-8,
+            'solution_epsilon': 1e-8,
+            'iterations_per_correction': 20,
+            'max_number_iterations': 2000,
+            'near_field_translation_distance': 1e6,
+            'store_translation_matrix': 0,
+            'fixed_or_random_orientation': 0,
+            'gaussian_beam_constant': 0,
+            'gaussian_beam_focal_point': [0, 0, 0],
+            'output_file': 'test.dat',
+            'run_print_file': 'run_print.dat',
+            'write_sphere_data': 1,
+            'incident_or_target_frame': 0,
+            'min_scattering_angle_deg': 0,
+            'max_scattering_angle_deg': 180,
+            'min_scattering_plane_angle_deg': 0,
+            'max_scattering_plane_angle_deg': 0,
+            'delta_scattering_angle_deg': '',
+            'number_scattering_angles': '',
+            'scattering_angle_file': '',
+            'incident_azimuth_angle_deg': 0,
+            'incident_polar_angle_deg': 0,
+            'calculate_scattering_coefficients': 1,
+            'scattering_coefficient_file': 'amn-temp.dat',
+            'track_iterations': 1,
+            'azimuth_average_scattering_matrix': 0,
+            'calculate_near_field': 0,
+            'near_field_plane_coord': 1,
+            'near_field_plane_position': 0,
+            'near_field_plane_vertices': '',
+            'spacial_step_size': 0.1,
+            'polarization_angle_deg': 0,
+            'near_field_output_file': 'nf-temp.dat',
+            'near_field_output_data': 1,
+            'plane_wave_epsilon': 1e-3,
+            'calculate_t_matrix': 1,
+            't_matrix_file': 'tmatrix-temp.dat',
+            't_matrix_convergence_epsilon': 1e-6,
+            'sm_number_processors': 10}
+        if name in _defaults:
+            self.name = name
+        elif:
+            raise AttributeError('{} is not a valid name'.format(name))
+        if value is None and name in _defaults:
+            value = _defaults[name]
+        self.group = group
+        self.print = print
+
+
 @attr.s
 class ModelOptions:
     # Options related to sphere target specification
