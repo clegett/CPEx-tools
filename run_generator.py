@@ -1,6 +1,7 @@
 import mmm
 import math
-import os, errno
+import os
+import errno
 import sys
 
 RHOST = 500
@@ -25,9 +26,6 @@ try:
         oclines = f.read().splitlines()
 except IOError as e:
     sys.exit('I/O error: file {}: {}'.format(ocfile, e))
-except:
-    sys.exit('Unexpected error while reading {}: {}'.format(ocfile, 
-        sys.exc_info()))
 
 ocarray = []
 for line in oclines:
@@ -45,7 +43,7 @@ for sphere in mypack.sphere_coords:
     print(sphere[1])
     print(sphere[2])
     mycluster.grainlist.append(mmm.Grain.new_grain(sphere[0], sphere[1],
-    sphere[2], RHOST, DRRIM, RINCL, NINCL))
+                               sphere[2], RHOST, DRRIM, RINCL, NINCL))
 
 myrun = mmm.ModelOptions()
 myrun.number_spheres = (1 + 1 + NINCL) * len(mycluster.grainlist)
@@ -66,20 +64,17 @@ try:
             myrun.length_scale_factor = (2*math.pi/float(line[0]))
             myrun.output_file = runoutputdir + 'dat/' + line[0] + 'nm.dat'
             myrun.scattering_coefficient_file = (runoutputdir + 'sc/' + line[0]
-                + 'nm.sc.dat')
+                                                 + 'nm.sc.dat')
             myrun.run_print_file = runoutputdir + 'run_print.dat'
             runoutput = myrun.get_formatted('required-and-non-defaults')
-            print(runoutput,file=out)
-            print('sphere_sizes_and_positions',file=out)
+            print(runoutput, file=out)
+            print('sphere_sizes_and_positions', file=out)
             for grain in mycluster.grainlist:
                 grain.print_rxyznk(out)
             if line[0] is not ocarray[len(ocarray) - 1][0]:
-                print('new_run',file=out)
+                print('new_run', file=out)
 except IOError as e:
     sys.exit('I/O error: file {}: {}'.format(outfile, e))
-except:
-    sys.exit('Unexpected error while writing {}: {}'.format(outfile,
-        sys.exc_info()))
 
 pbsfile = outdir + runname + '.pbs'
 try:
@@ -103,10 +98,7 @@ try:
         print('cd $PBS_O_WORKDIR', file=pbs)
         print('', file=pbs)
         print('mpiexec -np ' + str(nodes * tpn) + ' ./mstm_ttv2.3.exe ' +
-                runname + '.inp', file=pbs)
+              runname + '.inp', file=pbs)
         print('mv ~/' + runname + '* ' + runoutputdir, file=pbs)
 except IOError as e:
     sys.exit('I/O error: file {}: {}'.format(pbsfile, e))
-except:
-    sys.exit('Unexpected error while writing {}: {}'.format(pbsfile,
-        sys.exc_info()))
