@@ -384,36 +384,36 @@ class Cluster:
                                 grain_b.rim.r)
                     if distance > max_distance:
                         max_distance = distance
-                        center[0] = (grain_a.rim.x + grain_b.rim.x) / 2
-                        center[1] = (grain_a.rim.y + grain_b.rim.y) / 2
-                        center[2] = (grain_a.rim.z + grain_b.rim.z) / 2
+                        center.append((grain_a.rim.x + grain_b.rim.x) / 2)
+                        center.append((grain_a.rim.y + grain_b.rim.y) / 2)
+                        center.append((grain_a.rim.z + grain_b.rim.z) / 2)
                 elif grain_a.rim is not None and grain_b.rim is None:
                     distance = (grain_a.rim.distance_from(
                                 another_sphere=grain_b.host) + grain_a.rim.r +
                                 grain_b.host.r)
                     if distance > max_distance:
                         max_distance = distance
-                        center[0] = (grain_a.rim.x + grain_b.host.x) / 2
-                        center[1] = (grain_a.rim.y + grain_b.host.y) / 2
-                        center[2] = (grain_a.rim.z + grain_b.host.z) / 2
+                        center.append((grain_a.rim.x + grain_b.host.x) / 2)
+                        center.append((grain_a.rim.y + grain_b.host.y) / 2)
+                        center.append((grain_a.rim.z + grain_b.host.z) / 2)
                 elif grain_a.rim is None and grain_b.rim is not None:
                     distance = (grain_a.host.distance_from(
                                 another_sphere=grain_b.rim) + grain_a.host.r +
                                 grain_b.rim.r)
                     if distance > max_distance:
                         max_distance = distance
-                        center[0] = (grain_a.host.x + grain_b.rim.x) / 2
-                        center[1] = (grain_a.host.y + grain_b.rim.y) / 2
-                        center[2] = (grain_a.host.z + grain_b.rim.z) / 2
+                        center.append((grain_a.host.x + grain_b.rim.x) / 2)
+                        center.append((grain_a.host.y + grain_b.rim.y) / 2)
+                        center.append((grain_a.host.z + grain_b.rim.z) / 2)
                 elif grain_a.rim is None and grain_b.rim is None:
                     distance = (grain_a.host.distance_from(
                                 another_sphere=grain_b.host) + grain_a.host.r +
                                 grain_b.host.r)
                     if distance > max_distance:
                         max_distance = distance
-                        center[0] = (grain_a.host.x + grain_b.host.x) / 2
-                        center[1] = (grain_a.host.y + grain_b.host.y) / 2
-                        center[2] = (grain_a.host.z + grain_b.host.z) / 2
+                        center.append((grain_a.host.x + grain_b.host.x) / 2)
+                        center.append((grain_a.host.y + grain_b.host.y) / 2)
+                        center.append((grain_a.host.z + grain_b.host.z) / 2)
 
         return Sphere(center[0], center[1], center[2], max_distance/2)
 

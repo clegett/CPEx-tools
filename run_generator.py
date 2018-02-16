@@ -106,3 +106,17 @@ try:
         print('mv ~/' + runname + '* ' + runoutputdir, file=pbs)
 except IOError as e:
     sys.exit('I/O error: file {}: {}'.format(pbsfile, e))
+
+try:
+    with open(outdir + runname + 'stats.txt', 'w') as stats:
+        print('runname: ' + runname, file=stats)
+        print('spheres in pack: ' + str(spheres_in_pack), file=stats)
+        print('cluster packing fraction: '
+              + str(mycluster.get_packing_fraction()), file=stats)
+        print('cluster x-section: ' + str(mycluster.get_geom_xsection()),
+              file=stats)
+        print('cluster bounding sphere radius: '
+              + str(mycluster.get_bounding_sphere().r), file=stats)
+except IOError as e:
+    sys.exit('IOError while writing {}: {}'.format((outdir + runname
+                                                    + 'stats.txt'), e))
