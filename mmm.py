@@ -171,6 +171,14 @@ class ModelOptionValue:
             self.value = value
         self.print_me = print_me
 
+    @classmethod
+    def mov_from_name(cls, name, value=None, print_me=False):
+        if name in opt_dict:
+            return cls(opt_dict[name], value, print_me)
+        else:
+            raise AttributeError('{} is not a valid '
+                                 'ModelOption name'.format(name))
+
 
 class Grain:
     def __init__(self, host_sphere=None, rim=None, inclusions=None,
