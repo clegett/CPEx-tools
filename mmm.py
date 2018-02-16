@@ -257,6 +257,15 @@ class ModelRun:
         else:
             self.option_list = option_list
 
+    def set_option(self, option_name, value=None):
+        current_opts = {opt.name: [opt.value, self.option_list.index(opt)] for
+                        opt in self.option_list}
+        if option_name in current_opts:
+            self.option_list[current_opts[option_name][1]] = value
+        else:
+            self.option_list.append(
+                ModelOptionValue.mov_from_name(option_name, value))
+
     def formatted_options(self):
         options = ''
         for option in self.option_list:

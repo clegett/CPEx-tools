@@ -45,7 +45,7 @@ for sphere in mypack.sphere_coords:
     mycluster.grainlist.append(mmm.Grain.new_grain(sphere[0], sphere[1],
                                sphere[2], RHOST, DRRIM, RINCL, NINCL))
 
-myrun = mmm.ModelOptions()
+myrun = mmm.ModelRun(name=runname, fixed_or_random=mmm.RunType.FIXED)
 myrun.number_spheres = (1 + 1 + NINCL) * len(mycluster.grainlist)
 
 try:
