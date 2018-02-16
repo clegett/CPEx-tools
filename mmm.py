@@ -179,7 +179,7 @@ class ModelOptionValue:
                                  'ModelOption name'.format(name))
 
     def formatted_option(self):
-        return self.option.name + '\n' + self.value
+        return self.option.name + '\n' + str(self.value)
 
 
 class RunType(Enum):
@@ -189,90 +189,93 @@ class RunType(Enum):
 
 class ModelRun:
     def __init__(self, name=None, fixed_or_random=RunType.FIXED,
-                 option_list=None):
+                 option_val_list=None):
         self.name = name
         self.fixed_or_random = fixed_or_random
-        if option_list is None:
-            self.option_list = {}
+        if option_val_list is None:
+            self.option_val_list = []
             if fixed_or_random == RunType.FIXED:
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('number_spheres'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('sphere_position_file'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('length_scale_factor'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name(
                         'real_ref_index_scale_factor'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name(
                         'imag_ref_index_scale_factor'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('medium_real_ref_index'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('medium_imag_ref_index'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name(
                         'fixed_or_random_orientation', 0))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('output_file'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('run_print_file'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name(
                         'scattering_coefficient_file'))
             elif fixed_or_random == RunType.RANDOM:
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('number_spheres'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('sphere_position_file'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('length_scale_factor'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name(
                         'real_ref_index_scale_factor'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name(
                         'imag_ref_index_scale_factor'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('medium_real_ref_index'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('medium_imag_ref_index'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name(
                         'fixed_or_random_orientation', 1))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('output_file'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('run_print_file'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name(
                         'scattering_coefficient_file'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('calculate_t_matrix'))
-                option_list.append(
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('t_matrix_file'))
             else:
                 sys.exit('fixed_or_random is an invalid value')
         else:
-            self.option_list = option_list
+            self.option_val_list = option_val_list
 
     def set_option(self, option_name, value=None):
-        current_opts = {opt.name: [opt.value, self.option_list.index(opt)] for
-                        opt in self.option_list}
+        current_opts = {opt_val.option.name:
+                        [opt_val.value, self.option_val_list.index(opt_val)]
+                        for opt_val in self.option_val_list}
         if option_name in current_opts:
-            self.option_list[current_opts[option_name][1]] = value
+            self.option_val_list[current_opts[option_name][1]].value = value
         else:
-            self.option_list.append(
+            self.option_val_list.append(
                 ModelOptionValue.mov_from_name(option_name, value))
 
     def formatted_options(self):
         options = ''
-        for option in self.option_list:
-            if option is not option[len(self.option_list) - 1]:
-                options = options + option.formatted_option() + '\n'
+        for option_val in self.option_val_list:
+            if option_val is not self.option_val_list[len(
+                    self.option_val_list) - 1]:
+                options = options + option_val.formatted_option() + '\n'
             else:
-                options = options + option.formatted_option()
+                options = options + option_val.formatted_option()
+        return options
 
 
 class Grain:
@@ -499,11 +502,6 @@ class Pack:
 
     def rescale_pack(self, new_sphere_radius):
         multiplier = new_sphere_radius / self.sphere_radius
-        print('nsr:' + str(new_sphere_radius))
-        print('ssr:' + str(self.sphere_radius))
-        print('multiplier:' + str(multiplier))
-        print('sphere_coords:' + str(self.sphere_coords))
         self.sphere_coords = [[coord * multiplier for coord in row] for row in
                               self.sphere_coords]
-        print('new_shere_coords:' + str(self.sphere_coords))
         self.sphere_radius = new_sphere_radius

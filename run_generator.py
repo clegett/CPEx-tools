@@ -9,6 +9,7 @@ DRRIM = 100
 RINCL = 10
 NINCL = 100
 mypack = mmm.Pack.from_file('example_input/10.dat')
+spheres_in_pack = 10
 ocfile = 'example_input/rerun_oc.csv'
 
 queue = 'devel'
@@ -17,7 +18,8 @@ nodes = 100
 tpn = 28
 walltime = '1:59:00'
 
-runname = str(RHOST) + '-' + str(DRRIM) + '-' + str(RINCL) + '-' + str(NINCL)
+runname = str(spheres_in_pack) + 'x' + str(RHOST) + '-' + str(DRRIM) + '-' \
+          + str(RINCL) + '-' + str(NINCL)
 runoutputdir = ('/nobackupp8/clegett/' + runname + '/')
 outdir = runname + '/'
 
@@ -38,15 +40,12 @@ mycluster = mmm.Cluster()
 mycluster.grainlist = []
 
 for sphere in mypack.sphere_coords:
-    print(sphere)
-    print(sphere[0])
-    print(sphere[1])
-    print(sphere[2])
     mycluster.grainlist.append(mmm.Grain.new_grain(sphere[0], sphere[1],
                                sphere[2], RHOST, DRRIM, RINCL, NINCL))
 
 myrun = mmm.ModelRun(name=runname, fixed_or_random=mmm.RunType.FIXED)
-myrun.number_spheres = (1 + 1 + NINCL) * len(mycluster.grainlist)
+myrun.set_option('number_spheres', (1 + 1 + NINCL) * len(mycluster.grainlist))
+myrun.set_option('max_number_iterations', 5000)
 
 try:
     os.makedirs(outdir)
@@ -61,12 +60,17 @@ try:
             for grain in mycluster.grainlist:
                 grain.set_grain_oc(line[1], line[2], line[3], line[4],
                                    line[5], line[6])
-            myrun.length_scale_factor = (2*math.pi/float(line[0]))
-            myrun.output_file = runoutputdir + 'dat/' + line[0] + 'nm.dat'
-            myrun.scattering_coefficient_file = (runoutputdir + 'sc/' + line[0]
-                                                 + 'nm.sc.dat')
-            myrun.run_print_file = runoutputdir + 'run_print.dat'
-            runoutput = myrun.get_formatted('required-and-non-defaults')
+
+            myrun.set_option('length_scale_factor', (2*math.pi/float(line[0])))
+            myrun.set_option('output_file', runoutputdir + 'dat/' + line[0]
+                             + 'nm.dat')
+            myrun.set_option('scattering_coefficient_file',
+                             (runoutputdir + 'sc/' + line[0] + 'nm.sc.dat'))
+            myrun.set_option('run_print_file', runoutputdir + 'run_print.dat')
+            myrun.set_option('azimuth_average_scattering_matrix', 1)
+            myrun.set_option('delta_scattering_angle_deg', 1)
+
+            runoutput = myrun.formatted_options()
             print(runoutput, file=out)
             print('sphere_sizes_and_positions', file=out)
             for grain in mycluster.grainlist:
