@@ -14,6 +14,7 @@ import math
 import attr
 import random
 import sys
+from enum import Enum
 
 
 class Sphere:
@@ -163,7 +164,7 @@ opt_dict = {o.name: o for o in opts}
 
 
 class ModelOptionValue:
-    def __init__(self, option=None, value=None, print_me=False):
+    def __init__(self, option=None, value=None, print_me=True):
         self.option = option
         if value is None:
             self.value = option.default_value
@@ -172,12 +173,88 @@ class ModelOptionValue:
         self.print_me = print_me
 
     @classmethod
-    def mov_from_name(cls, name, value=None, print_me=False):
+    def mov_from_name(cls, name, value=None, print_me=True):
         if name in opt_dict:
             return cls(opt_dict[name], value, print_me)
         else:
             raise AttributeError('{} is not a valid '
                                  'ModelOption name'.format(name))
+
+
+class RunType(Enum):
+    FIXED = 0
+    RANDOM = 1
+
+
+class ModelRun:
+    def __init__(self, name=None, fixed_or_random=RunType.FIXED,
+                 option_list=None):
+        self.name = name
+        self.fixed_or_random = fixed_or_random
+        if option_list is None:
+            self.option_list = {}
+            if fixed_or_random == RunType.FIXED:
+                option_list.append(
+                    ModelOptionValue.mov_from_name('number_spheres'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name('sphere_position_file'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name('length_scale_factor'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name(
+                        'real_ref_index_scale_factor'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name(
+                        'imag_ref_index_scale_factor'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name('medium_real_ref_index'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name('medium_imag_ref_index'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name(
+                        'fixed_or_random_orientation', 0))
+                option_list.append(
+                    ModelOptionValue.mov_from_name('output_file'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name('run_print_file'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name(
+                        'scattering_coefficient_file'))
+            elif fixed_or_random == RunType.RANDOM:
+                option_list.append(
+                    ModelOptionValue.mov_from_name('number_spheres'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name('sphere_position_file'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name('length_scale_factor'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name(
+                        'real_ref_index_scale_factor'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name(
+                        'imag_ref_index_scale_factor'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name('medium_real_ref_index'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name('medium_imag_ref_index'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name(
+                        'fixed_or_random_orientation', 1))
+                option_list.append(
+                    ModelOptionValue.mov_from_name('output_file'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name('run_print_file'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name(
+                        'scattering_coefficient_file'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name('calculate_t_matrix'))
+                option_list.append(
+                    ModelOptionValue.mov_from_name('t_matrix_file'))
+            else:
+                sys.exit('fixed_or_random is an invalid value')
+        else:
+            self.option_list = option_list
 
 
 class Grain:
