@@ -101,197 +101,86 @@ class Sphere:
 
 
 class ModelOption:
-    def __init__(self, name, value=None):
-        _defaults = {
-            'number_spheres': '',
-            'sphere_position_file': 'at_bottom',
-            'length_scale_factor': 1,
-            'real_ref_index_scale_factor': 1,
-            'imag_ref_index_scale_factor': 1,
-            'real_chiral_factor': 0,
-            'imag_chiral_factor': 0,
-            'medium_real_ref_index': 1,
-            'medium_imag_ref_index': 0,
-            'medium_real_chiral_factor': 0,
-            'medium_imag_chiral_factor': 0,
-            'target_euler_angles_deg': [0, 0, 0],
-            'mie_epsilon': 1e-6,
-            'translation_epsilon': 1e-8,
-            'solution_epsilon': 1e-8,
-            'iterations_per_correction': 20,
-            'max_number_iterations': 2000,
-            'near_field_translation_distance': 1e6,
-            'store_translation_matrix': 0,
-            'fixed_or_random_orientation': 0,
-            'gaussian_beam_constant': 0,
-            'gaussian_beam_focal_point': [0, 0, 0],
-            'output_file': 'test.dat',
-            'run_print_file': 'run_print.dat',
-            'write_sphere_data': 1,
-            'incident_or_target_frame': 0,
-            'min_scattering_angle_deg': 0,
-            'max_scattering_angle_deg': 180,
-            'min_scattering_plane_angle_deg': 0,
-            'max_scattering_plane_angle_deg': 0,
-            'delta_scattering_angle_deg': '',
-            'number_scattering_angles': '',
-            'scattering_angle_file': '',
-            'incident_azimuth_angle_deg': 0,
-            'incident_polar_angle_deg': 0,
-            'calculate_scattering_coefficients': 1,
-            'scattering_coefficient_file': 'amn-temp.dat',
-            'track_iterations': 1,
-            'azimuth_average_scattering_matrix': 0,
-            'calculate_near_field': 0,
-            'near_field_plane_coord': 1,
-            'near_field_plane_position': 0,
-            'near_field_plane_vertices': '',
-            'spacial_step_size': 0.1,
-            'polarization_angle_deg': 0,
-            'near_field_output_file': 'nf-temp.dat',
-            'near_field_output_data': 1,
-            'plane_wave_epsilon': 1e-3,
-            'calculate_t_matrix': 1,
-            't_matrix_file': 'tmatrix-temp.dat',
-            't_matrix_convergence_epsilon': 1e-6,
-            'sm_number_processors': 10}
-        if name in _defaults:
-            self.name = name
-        elif:
-            raise AttributeError('{} is not a valid name'.format(name))
-        if value is None and name in _defaults:
-            value = _defaults[name]
+    def __init__(self, name, default_value, group):
+        self.name = name
+        self.default_value = default_value
         self.group = group
-        self.print = print
 
 
-@attr.s
-class ModelOptions:
-    # Options related to sphere target specification
-    number_spheres = attr.ib(default="")
-    sphere_position_file = attr.ib(default="at_bottom")
-    length_scale_factor = attr.ib(default=1)
-    real_ref_index_scale_factor = attr.ib(default="1")
-    imag_ref_index_scale_factor = attr.ib(default="1")
-    real_chiral_factor = attr.ib(default=0)
-    imag_chiral_factor = attr.ib(default=0)
-    medium_real_ref_index = attr.ib(default=1)
-    medium_imag_ref_index = attr.ib(default=0)
-    medium_real_chiral_factor = attr.ib(default=0)
-    medium_imag_chiral_factor = attr.ib(default=0)
-    target_euler_angles_deg = attr.ib(default="0 0 0")
+opts = [ModelOption('number_spheres', 'target', ''),
+        ModelOption('sphere_position_file', 'target', 'at_bottom'),
+        ModelOption('length_scale_factor', 1, 'target'),
+        ModelOption('real_ref_index_scale_factor', 1, 'target'),
+        ModelOption('imag_ref_index_scale_factor', 1, 'target'),
+        ModelOption('real_chiral_factor', 0, 'target'),
+        ModelOption('imag_chiral_factor', 0, 'target'),
+        ModelOption('medium_real_ref_index', 1, 'target'),
+        ModelOption('medium_imag_ref_index', 0, 'target'),
+        ModelOption('medium_real_chiral_factor', 0, 'target'),
+        ModelOption('medium_imag_chiral_factor', 0, 'target'),
+        ModelOption('target_euler_angles_deg', [0, 0, 0], 'target'),
+        ModelOption('mie_epsilon', 1e-6, 'solution'),
+        ModelOption('translation_epsilon', 1e-8, 'solution'),
+        ModelOption('solution_epsilon', 1e-8, 'solution'),
+        ModelOption('iterations_per_correction', 20, 'solution'),
+        ModelOption('max_number_iterations', 2000, 'solution'),
+        ModelOption('near_field_translation_distance', 1e6, 'solution'),
+        ModelOption('store_translation_matrix', 0, 'solution'),
+        ModelOption('fixed_or_random_orientation', 0, 'misc'),
+        ModelOption('gaussian_beam_constant', 0, 'misc'),
+        ModelOption('gaussian_beam_focal_point', [0, 0, 0], 'misc'),
+        ModelOption('output_file', 'test.dat', 'misc'),
+        ModelOption('run_print_file', 'run_print.dat', 'misc'),
+        ModelOption('write_sphere_data', 1, 'misc'),
+        ModelOption('incident_or_target_frame', 0, 'smatrix'),
+        ModelOption('min_scattering_angle_deg', 0, 'smatrix'),
+        ModelOption('max_scattering_angle_deg', 180, 'smatrix'),
+        ModelOption('min_scattering_plane_angle_deg', 0, 'smatrix'),
+        ModelOption('max_scattering_plane_angle_deg', 0, 'smatrix'),
+        ModelOption('delta_scattering_angle_deg', '', 'smatrix'),
+        ModelOption('number_scattering_angles', '', 'smatrix'),
+        ModelOption('scattering_angle_file', '', 'smatrix'),
+        ModelOption('incident_azimuth_angle_deg', 0, 'fixed'),
+        ModelOption('incident_polar_angle_deg', 0, 'fixed'),
+        ModelOption('calculate_scattering_coefficients', 1, 'fixed'),
+        ModelOption('scattering_coefficient_file', 'amn-temp.dat', 'fixed'),
+        ModelOption('track_iterations', 1, 'fixed'),
+        ModelOption('azimuth_average_scattering_matrix', 0, 'fixed'),
+        ModelOption('calculate_near_field', 0, 'fixed'),
+        ModelOption('near_field_plane_coord', 1, 'fixed'),
+        ModelOption('near_field_plane_position', 0, 'fixed'),
+        ModelOption('near_field_plane_vertices', '', 'fixed'),
+        ModelOption('spacial_step_size', 0.1, 'fixed'),
+        ModelOption('polarization_angle_deg', 0, 'fixed'),
+        ModelOption('near_field_output_file', 'nf-temp.dat', 'fixed'),
+        ModelOption('near_field_output_data', 1, 'fixed'),
+        ModelOption('plane_wave_epsilon', 1e-3, 'fixed'),
+        ModelOption('calculate_t_matrix', 1, 'random'),
+        ModelOption('t_matrix_file', 'tmatrix-temp.dat', 'random'),
+        ModelOption('t_matrix_convergence_epsilon', 1e-6, 'random'),
+        ModelOption('sm_number_processors', 10, 'random')]
+opt_dict = {o.name: o for o in opts}
 
-    # Options related to numerical solution
-    mie_epsilon = attr.ib(default=1e-6)
-    translation_epsilon = attr.ib(default=1e-8)
-    solution_epsilon = attr.ib(default=1e-8)
-    iterations_per_correction = attr.ib(default=20)
-    max_number_iterations = attr.ib(default=2000)
-    near_field_translation_distance = attr.ib(default=1e6)
-    store_translation_matrix = attr.ib(default=0)
 
-    # Global options related to incident field state and output files
-    fixed_or_random_orientation = attr.ib(default=0)
-    gaussian_beam_constant = attr.ib(default=0)
-    gaussian_beam_focal_point = attr.ib(default="0 0 0")
-    output_file = attr.ib(default="test.dat")
-    run_print_file = attr.ib(default="run_print.dat")
-    write_sphere_data = attr.ib(default=1)
-
-    # Options related to scattering matrix output
-    incident_or_target_frame = attr.ib(default=0)
-    min_scattering_angel_deg = attr.ib(default=0)
-    max_scattering_angle_deg = attr.ib(default=180)
-    min_scattering_plane_angle_deg = attr.ib(default=0)
-    max_scattering_plane_angle_deg = attr.ib(default=0)
-    delta_scattering_angle_deg = attr.ib(default="")
-    number_scattering_angles = attr.ib(default="")
-    scattering_angle_file = attr.ib(default="")
-
-    # Options for fixed orientation calculations
-    incident_azimuth_angle_deg = attr.ib(default=0)
-    incident_polar_angle_deg = attr.ib(default=0)
-    calculate_scattering_coefficients = attr.ib(default=1)
-    scattering_coefficient_file = attr.ib(default="amn-temp.dat")
-    track_iterations = attr.ib(default=1)
-    azimuth_average_scattering_matrix = attr.ib(default=0)
-    calculate_near_field = attr.ib(default=0)
-    near_field_plane_coord = attr.ib(default=1)
-    near_field_plane_position = attr.ib(default=0)
-    near_field_plane_vertices = attr.ib(default="")
-    spacial_step_size = attr.ib(default=0.1)
-    polarization_angle_deg = attr.ib(default=0)
-    near_field_output_file = attr.ib(default="nf-temp.dat")
-    near_field_output_data = attr.ib(default=1)
-    plane_wave_epsilon = attr.ib(default=1e-3)
-
-    # Options for random orientation calculations
-    calculate_t_matrix = attr.ib(default=1)
-    t_matrix_file = attr.ib(default="tmatrix-temp.dat")
-    t_matrix_convergence_epsilon = attr.ib(default=1e-6)
-    sm_number_processors = attr.ib(default=10)
-
-    def is_default(self, name):
-        return (getattr(self, name) ==
-                getattr(attr.fields(type(self)), name).default)
-
-    def get_formatted(self, setname):
-        output = ""
-        required_keys = \
-            ["number_spheres", "sphere_position_file",
-             "length_scale_factor", "real_ref_index_scale_factor",
-             "imag_ref_index_scale_factor", "medium_real_ref_index",
-             "medium_imag_ref_index", "fixed_or_random_orientation",
-             "output_file", "run_print_file", "scattering_coefficient_file"]
-
-        if setname == "defaults":
-            for key in self.__dict__:
-                if self.is_default(key):
-                    if len(output) != 0:
-                        output = output + "\n"
-                    output = output + key + "\n" + str(self.__dict__[key])
-            return output
-        elif setname == "required":
-            for key in required_keys:
-                if len(output) != 0:
-                    output = output + "\n"
-                output = output + key + "\n" + str(self.__dict__[key])
-            if self.__dict__['fixed_or_random_orientation'] == 1:
-                output = ("\n" + 't_matrix_file' + "\n" +
-                          self.__dict__['t_matrix_file'])
-            return output
-        elif setname == "non-defaults":
-            for key in self.__dict__:
-                if not self.is_default(key):
-                    if len(output) != 0:
-                        output = output + "\n"
-                    output = output + key + "\n" + str(self.__dict__[key])
-            return output
-        elif setname == "required-and-non-defaults":
-            for key in self.__dict__:
-                if not self.is_default(key) or key in required_keys:
-                    if len(output) != 0:
-                        output = output + "\n"
-                    output = output + key + "\n" + str(self.__dict__[key])
-            return output
-        elif setname == "all":
-            for key in self.__dict__:
-                if len(output) != 0:
-                    output = output + "\n"
-                output = output + key + "\n" + str(self.__dict__[key])
-            return output
+class ModelOptionValue:
+    def __init__(self, option=None, value=None, print_me=False):
+        self.option = option
+        if value is None:
+            self.value = option.default_value
         else:
-            return False
+            self.value = value
+        self.print_me = print_me
 
 
-@attr.s
 class Grain:
-    host_sphere = attr.ib(default=None)
-    rim = attr.ib(default=None)
-    inclusions = attr.ib(default=None)
-    host_radius = attr.ib(default=None)
-    rim_thickness = attr.ib(default=None)
-    num_inclusions = attr.ib(default=None)
+    def __init__(self, host_sphere=None, rim=None, inclusions=None,
+                 host_radius=None, rim_thickness=None, num_inclusions=None):
+        self.host_sphere = host_sphere
+        self.rim = rim
+        self.inclusions = inclusions
+        self.host_radius = host_radius
+        self.rim_thickness = rim_thickness
+        self.num_inclusions = num_inclusions
 
     @classmethod
     def new_grain(cls, x, y, z, r_host, dr_rim, r_incl, n_incl):
