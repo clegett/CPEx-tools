@@ -102,83 +102,84 @@ class Sphere:
 
 
 class ModelOption:
-    def __init__(self, name, default_value, group):
+    def __init__(self, name, default_value):
         self.name = name
         self.default_value = default_value
-        self.group = group
 
 
-opts = [ModelOption('number_spheres', 'target', ''),
-        ModelOption('sphere_position_file', 'target', 'at_bottom'),
-        ModelOption('length_scale_factor', 1, 'target'),
-        ModelOption('real_ref_index_scale_factor', 1, 'target'),
-        ModelOption('imag_ref_index_scale_factor', 1, 'target'),
-        ModelOption('real_chiral_factor', 0, 'target'),
-        ModelOption('imag_chiral_factor', 0, 'target'),
-        ModelOption('medium_real_ref_index', 1, 'target'),
-        ModelOption('medium_imag_ref_index', 0, 'target'),
-        ModelOption('medium_real_chiral_factor', 0, 'target'),
-        ModelOption('medium_imag_chiral_factor', 0, 'target'),
-        ModelOption('target_euler_angles_deg', [0, 0, 0], 'target'),
-        ModelOption('mie_epsilon', 1e-6, 'solution'),
-        ModelOption('translation_epsilon', 1e-8, 'solution'),
-        ModelOption('solution_epsilon', 1e-8, 'solution'),
-        ModelOption('iterations_per_correction', 20, 'solution'),
-        ModelOption('max_number_iterations', 2000, 'solution'),
-        ModelOption('near_field_translation_distance', 1e6, 'solution'),
-        ModelOption('store_translation_matrix', 0, 'solution'),
-        ModelOption('fixed_or_random_orientation', 0, 'misc'),
-        ModelOption('gaussian_beam_constant', 0, 'misc'),
-        ModelOption('gaussian_beam_focal_point', [0, 0, 0], 'misc'),
-        ModelOption('output_file', 'test.dat', 'misc'),
-        ModelOption('run_print_file', 'run_print.dat', 'misc'),
-        ModelOption('write_sphere_data', 1, 'misc'),
-        ModelOption('incident_or_target_frame', 0, 'smatrix'),
-        ModelOption('min_scattering_angle_deg', 0, 'smatrix'),
-        ModelOption('max_scattering_angle_deg', 180, 'smatrix'),
-        ModelOption('min_scattering_plane_angle_deg', 0, 'smatrix'),
-        ModelOption('max_scattering_plane_angle_deg', 0, 'smatrix'),
-        ModelOption('delta_scattering_angle_deg', '', 'smatrix'),
-        ModelOption('number_scattering_angles', '', 'smatrix'),
-        ModelOption('scattering_angle_file', '', 'smatrix'),
-        ModelOption('incident_azimuth_angle_deg', 0, 'fixed'),
-        ModelOption('incident_polar_angle_deg', 0, 'fixed'),
-        ModelOption('calculate_scattering_coefficients', 1, 'fixed'),
-        ModelOption('scattering_coefficient_file', 'amn-temp.dat', 'fixed'),
-        ModelOption('track_iterations', 1, 'fixed'),
-        ModelOption('azimuth_average_scattering_matrix', 0, 'fixed'),
-        ModelOption('calculate_near_field', 0, 'fixed'),
-        ModelOption('near_field_plane_coord', 1, 'fixed'),
-        ModelOption('near_field_plane_position', 0, 'fixed'),
-        ModelOption('near_field_plane_vertices', '', 'fixed'),
-        ModelOption('spacial_step_size', 0.1, 'fixed'),
-        ModelOption('polarization_angle_deg', 0, 'fixed'),
-        ModelOption('near_field_output_file', 'nf-temp.dat', 'fixed'),
-        ModelOption('near_field_output_data', 1, 'fixed'),
-        ModelOption('plane_wave_epsilon', 1e-3, 'fixed'),
-        ModelOption('calculate_t_matrix', 1, 'random'),
-        ModelOption('t_matrix_file', 'tmatrix-temp.dat', 'random'),
-        ModelOption('t_matrix_convergence_epsilon', 1e-6, 'random'),
-        ModelOption('sm_number_processors', 10, 'random')]
+opts = [ModelOption('number_spheres', ''),
+        ModelOption('sphere_position_file', 'at_bottom'),
+        ModelOption('length_scale_factor', 1),
+        ModelOption('real_ref_index_scale_factor', 1),
+        ModelOption('imag_ref_index_scale_factor', 1),
+        ModelOption('real_chiral_factor', 0),
+        ModelOption('imag_chiral_factor', 0),
+        ModelOption('medium_real_ref_index', 1),
+        ModelOption('medium_imag_ref_index', 0),
+        ModelOption('medium_real_chiral_factor', 0),
+        ModelOption('medium_imag_chiral_factor', 0),
+        ModelOption('target_euler_angles_deg', [0, 0, 0]),
+        ModelOption('mie_epsilon', 1e-6),
+        ModelOption('translation_epsilon', 1e-8),
+        ModelOption('solution_epsilon', 1e-8),
+        ModelOption('iterations_per_correction', 20),
+        ModelOption('max_number_iterations', 2000),
+        ModelOption('near_field_translation_distance', 1e6),
+        ModelOption('store_translation_matrix', 0),
+        ModelOption('fixed_or_random_orientation', 0),
+        ModelOption('gaussian_beam_constant', 0),
+        ModelOption('gaussian_beam_focal_point', [0, 0, 0]),
+        ModelOption('output_file', 'test.dat'),
+        ModelOption('run_print_file', 'run_print.dat'),
+        ModelOption('write_sphere_data', 1),
+        ModelOption('incident_or_target_frame', 0),
+        ModelOption('min_scattering_angle_deg', 0),
+        ModelOption('max_scattering_angle_deg', 180),
+        ModelOption('min_scattering_plane_angle_deg', 0),
+        ModelOption('max_scattering_plane_angle_deg', 0),
+        ModelOption('delta_scattering_angle_deg', ''),
+        ModelOption('number_scattering_angles', ''),
+        ModelOption('scattering_angle_file', ''),
+        ModelOption('incident_azimuth_angle_deg', 0),
+        ModelOption('incident_polar_angle_deg', 0),
+        ModelOption('calculate_scattering_coefficients', 1),
+        ModelOption('scattering_coefficient_file', 'amn-temp.dat'),
+        ModelOption('track_iterations', 1),
+        ModelOption('azimuth_average_scattering_matrix', 0),
+        ModelOption('calculate_near_field', 0),
+        ModelOption('near_field_plane_coord', 1),
+        ModelOption('near_field_plane_position', 0),
+        ModelOption('near_field_plane_vertices', ''),
+        ModelOption('spacial_step_size', 0.1),
+        ModelOption('polarization_angle_deg', 0),
+        ModelOption('near_field_output_file', 'nf-temp.dat'),
+        ModelOption('near_field_output_data', 1),
+        ModelOption('plane_wave_epsilon', 1e-3),
+        ModelOption('calculate_t_matrix', 1),
+        ModelOption('t_matrix_file', 'tmatrix-temp.dat'),
+        ModelOption('t_matrix_convergence_epsilon', 1e-6),
+        ModelOption('sm_number_processors', 10)]
 opt_dict = {o.name: o for o in opts}
 
 
 class ModelOptionValue:
-    def __init__(self, option=None, value=None, print_me=True):
+    def __init__(self, option=None, value=None):
         self.option = option
         if value is None:
             self.value = option.default_value
         else:
             self.value = value
-        self.print_me = print_me
 
     @classmethod
-    def mov_from_name(cls, name, value=None, print_me=True):
+    def mov_from_name(cls, name, value=None):
         if name in opt_dict:
-            return cls(opt_dict[name], value, print_me)
+            return cls(opt_dict[name], value)
         else:
             raise AttributeError('{} is not a valid '
                                  'ModelOption name'.format(name))
+
+    def formatted_option(self):
+        return self.option.name + '\n' + self.value
 
 
 class RunType(Enum):
@@ -255,6 +256,14 @@ class ModelRun:
                 sys.exit('fixed_or_random is an invalid value')
         else:
             self.option_list = option_list
+
+    def formatted_options(self):
+        options = ''
+        for option in self.option_list:
+            if option is not option[len(self.option_list) - 1]:
+                options = options + option.formatted_option() + '\n'
+            else:
+                options = options + option.formatted_option()
 
 
 class Grain:
