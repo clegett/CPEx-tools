@@ -18,10 +18,10 @@ nodes = 100
 tpn = 28
 walltime = '1:59:00'
 
-runname = str(spheres_in_pack) + 'x' + str(RHOST) + '-' + str(DRRIM) + '-' \
-          + str(RINCL) + '-' + str(NINCL)
-runoutputdir = ('/nobackupp8/clegett/' + runname + '/')
-outdir = runname + '/'
+runname = '{!s}x{!s}-{!s}-{!s}-{!s}'.format(spheres_in_pack, RHOST, DRRIM,
+                                            RINCL, NINCL)
+runoutputdir = '/nobackupp8/clegett/{}/'.format(runname)
+outdir = '{}/'.format(runname)
 
 try:
     with open(ocfile) as f:
@@ -53,7 +53,7 @@ except OSError as e:
     if e.errno != errno.EEXIST:
         raise
 
-outfile = outdir + runname + '.inp'
+outfile = '{}{}.inp'.format(outdir, runname)
 try:
     with open(outfile, 'w') as out:
         for line in ocarray:
@@ -81,7 +81,7 @@ try:
 except IOError as e:
     sys.exit('I/O error: file {}: {}'.format(outfile, e))
 
-pbsfile = outdir + runname + '.pbs'
+pbsfile = '{}{}.pbs'.format(outdir, runname)
 try:
     with open(pbsfile, 'w') as pbs:
         print('#PBS -N {}'.format(runname), file=pbs)
