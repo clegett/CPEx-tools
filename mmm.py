@@ -45,7 +45,8 @@ __maintainer = 'Carey Legett'
 __status__ = 'Development'
 __version__ = '1.0'
 
-class Sphere:
+
+class Sphere(object):
     """A class describing the spheres used in the MSTM model
 
     This class holds the physical and optical properties of the spheres used in
@@ -128,30 +129,55 @@ class Sphere:
         """Return the geometric cross sectional area of this sphere."""
         return math.pi * self.r ** 2
 
+    def get_tabbed_rxyz(self):
+        return '{r!s}\t{x!s}\t{y!s}\t{z!s}'.format(**self.__dict__)
 
-class ModelOption:
-    """A class to store a name and value of an option for the MSTM model.
+    def get_tabbed_rxyznk(self):
+        if self.n is None:
+            raise ValueError('attribute n cannot be None')
+        elif self.k is None:
+            raise ValueError('attribute k cannot be None')
+        else:
+            return '{r!s}\t{x!s}\t{y!s}\t{z!s}\t{n!s}\t{k!s}' \
+                   ''.format(**self.__dict__)
 
-    This class holds a name and a value of a single option to be passed to the
-    MSTM model in an input file. It is primarily intended to be used with the
-    module level dictionary 'opt_dict' which initializes one ModelOption for
-    every possible valid option.
+    def get_tabbed_chiral(self):
+        if self.n is None:
+            raise ValueError('attribute n cannot be None')
+        elif self.k is None:
+            raise ValueError('attribute k cannot be None')
+        elif self.real_chiral is None:
+            raise ValueError('attribute real_chiral cannot be None')
+        elif self.imag_chiral is None:
+            raise ValueError('attribute imag_chiral cannot be None')
+        else:
+            return '{r!s}\t{x!s}\t{y!s}\t{z!s}\t{n!s}\t{k!s}\t' \
+                   '{real_chiral!s}\t{imag_chiral!s}'.format(**self.__dict__)
+
+    def get_tabbed_tmatrix(self):
+        if self.tmatrix_file is None:
+            raise ValueError('attribute tmatrix_file cannot be None')
+        else:
+            return '{r!s}\t{x!s}\t{y!s}\t{z!s}\t{tmatrix_file!s}' \
+                   ''.format(**self.__dict__)
+
+
+class ModelOption(object):
+    """A class to store a name & default value of an option for the MSTM model.
+
+    This class holds a name and a default value of a single option to be passed
+    to the MSTM model in an input file. It is primarily intended to be used
+    with the module level dictionary 'opt_dict' which initializes one
+    ModelOption for every possible valid option.
 
     Attributes:
         name (str): the name of the MSTM model option
-        y (float): the y coordinate for the center of the sphere
-        z (float): the z coordinate for the center of the sphere
-        r (float): the radius of the sphere
-        n (float): the real portion of the index of refraction
-        k (float): the imaginary portion of the index of refraction (extinction
-            coefficient)
-        real_chiral (float): the real portion of the chiral factor beta
-        imag_chiral (float): the imaginary portion of the chiral factor beta
-        tmatrix_file (Str): the name of the file containing the previously
-        calculated T-matrix for this sphere
+        default_value: the default value of the model option as listed in MSTM
+            documentation
 
     """
     def __init__(self, name, default_value):
+        """Initializes ModelOption with a name and default value"""
         self.name = name
         self.default_value = default_value
 
@@ -211,8 +237,20 @@ opts = [ModelOption('number_spheres', ''),
 opt_dict = {o.name: o for o in opts}
 
 
-class ModelOptionValue:
-    def __init__(self, option=None, value=None):
+class ModelOptionValue(object):
+    """A class to associate a ModelOption object with a value set at runtime
+
+    This class holds a ModelOption object and an associated value for a single
+    option to be passed to the MSTM model in an input file.
+
+    Attributes:
+        option (ModelOption): the ModelOption object to which we want to assign
+            a value
+        value: the value of that model option
+
+    """
+    def __init__(self, option, value=None):
+        """Initializes ModelOptionValue with an option and optional value"""
         self.option = option
         if value is None:
             self.value = option.default_value
@@ -236,7 +274,7 @@ class RunType(Enum):
     RANDOM = 1
 
 
-class ModelRun:
+class ModelRun(object):
     def __init__(self, name=None, fixed_or_random=RunType.FIXED,
                  option_val_list=None):
         self.name = name
@@ -317,17 +355,19 @@ class ModelRun:
                 ModelOptionValue.mov_from_name(option_name, value))
 
     def formatted_options(self):
-        options = ''
+        options = ['']
         for option_val in self.option_val_list:
             if option_val is not self.option_val_list[len(
                     self.option_val_list) - 1]:
-                options = options + option_val.formatted_option() + '\n'
+                options.append(option_val.formatted_option())
+                options.append('\n')
             else:
-                options = options + option_val.formatted_option()
-        return options
+                options.append(option_val.formatted_option())
+
+        return ''.join(options)
 
 
-class Grain:
+class Grain(object):
     def __init__(self, host_sphere=None, rim=None, inclusions=None,
                  host_radius=None, rim_thickness=None, num_inclusions=None):
         self.host_sphere = host_sphere
@@ -400,24 +440,19 @@ class Grain:
             inclusion.n = incl_n
             inclusion.k = incl_k
 
-    def print_rxyznk(self, tofile=sys.stdout):
-        print(str(self.host_sphere.r) + '\t' + str(self.host_sphere.x) + '\t'
-              + str(self.host_sphere.y) + '\t' + str(self.host_sphere.z) +
-              '\t' + str(self.host_sphere.n) + '\t' +
-              str(self.host_sphere.k), file=tofile)
-
-        print(str(self.rim.r) + '\t' + str(self.rim.x) + '\t' +
-              str(self.rim.y) + '\t' + str(self.rim.z) + '\t' +
-              str(self.rim.n) + '\t' + str(self.rim.k), file=tofile)
+    def get_rxyznk(self):
+        mylist = [self.host_sphere.get_tabbed_rxyznk(), '\n',
+                  self.rim.get_tabbed_rxyznk(), '\n']
 
         for inclusion in self.inclusions:
-            print(str(inclusion.r) + '\t' + str(inclusion.x) + '\t' +
-                  str(inclusion.y) + '\t' + str(inclusion.z) + '\t' +
-                  str(inclusion.n) + '\t' + str(inclusion.k), file=tofile)
+            mylist.append(inclusion.get_tabbed_rxyznk())
+            mylist.append('\n')
+
+        return ''.join(mylist)
 
 
 @attr.s
-class Cluster:
+class Cluster(object):
     grainlist = attr.ib(default=None)
 
     def get_bounding_sphere(self):
@@ -487,7 +522,7 @@ class Cluster:
         return math.pi * bounding_sphere.r ** 2
 
 
-class Pack:
+class Pack(object):
     """A class containing the data generated by a PackLSD run.
 
     This class holds the metadata and x,y,z coordinates generated by a PackLSD
