@@ -23,13 +23,12 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import argparse
 import sys
 import itertools
-import os
 import csv
 
 __author__ = 'Carey Legett'
 __contact__ = 'carey.legett@stonybrook.edu'
 __copyright__ = 'Copyright 2018, Stony Brook University'
-__credits__ = ['Carey Legett', 'freenode #r/linux', 'freenode #python']
+__credits__ = ['Carey Legett', 'Freenode #r/linux', 'Freenode #python']
 __date__ = '2018/02/19'
 __deprecated__ = False
 __email__ = 'carey.legett@stonybrook.edu'
@@ -37,6 +36,7 @@ __license__ = 'GPLv3'
 __maintainer = 'Carey Legett'
 __status__ = 'Development'
 __version__ = '1.0'
+
 
 def parse_cmdln_args():
     """A function to parse command line arguments for this module.
@@ -61,42 +61,47 @@ def parse_cmdln_args():
     """
 
     parser = argparse.ArgumentParser(prog='continuum_removal.py',
-            description=__doc__, epilog='''For more information\
-            contact Chip at carey.legett@stonybrook.edu.''')
-    parser.add_argument('-f', '--input-file', required=True, help='''The\
-            name of the input file (include path if the file is not in this\
-            directory).''', dest='ifile')
+                                     description=__doc__,
+                                     epilog='''For more information contact\ 
+                                     Chip at carey.legett@stonybrook.edu.''')
+    parser.add_argument('-f', '--input-file', required=True,
+                        help='''The name of the input file (include path if the
+                        file is not in this directory).''', dest='ifile')
     parser.add_argument('-a', '--xstart', type=int, required=True,
-            help='The x value at which to begin the continuum calculation.', 
-            dest='xa')
-    parser.add_argument('-b', '--xstop', type=int, required=True,
-            help='The x value at which to end the continuum calculation.', 
-            dest='xb')
+                        help='''The x value at which to begin the continuum 
+                        calculation.''', dest='xa')
+    parser.add_argument('-b', '--xstop', type=int, required=True, help='''The x
+                        value at which to end the continuum calculation.''',
+                        dest='xb')
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('-d', '--delimiter', help='''The\
-            delimiter for the input file. A single character representing the\ 
-            actual delimiter. Mutually exclusive with -w or --whitespace''', 
-            dest='delim')
-    group.add_argument('-w', '--whitespace', help='''Indicates the delimiter is \
-            either tabs or spaces. Mutually exclusive with -d or --delimiter.''',
-            action='store_true', dest='whitespace')
-    parser.add_argument('-n', '--skip-lines', default=0, help='''Skip\
-            this many lines of the input file before reading in data.''', type=int,
-            dest='skip')
+    group.add_argument('-d', '--delimiter', help='''The delimiter for the input
+                       file. A single character representing the actual 
+                       delimiter. Mutually exclusive with -w or 
+                       --whitespace''', dest='delim')
+    group.add_argument('-w', '--whitespace', help='''Indicates the delimiter is
+                       either tabs or spaces. Mutually exclusive with -d or 
+                       --delimiter.''', action='store_true', dest='whitespace')
+    parser.add_argument('-n', '--skip-lines', default=0, help='''Skip this many
+                        lines of the input file before reading in data.''',
+                        type=int, dest='skip')
     parser.add_argument('-o', '--output-file', nargs='?', default='output.txt', 
-            help='''The name of the output file (include path if you want the file\
-            somewhere other than in the current directory). Defaults to \
-            output.txt.''', dest='ofile')
+                        help='''The name of the output file (include path 
+                        if you want the file somewhere other than in the 
+                        current directory). Defaults to output.txt.''',
+                        dest='ofile')
     parser.add_argument('-i', '--include-input', action='store_true', dest='i',
-            help='Write the original input data before the (optional) continuum \
-            fit and continuum removed data.')
-    parser.add_argument('-c', '--continuum-output', action='store_true', dest='c',
-            help='Write the continuum fit for each input x value after the\
-            (optional) original input data and before the continuum removed data.')
+                        help='''Write the original input data before the
+                        (optional) continuum fit and continuum removed 
+                        data.''')
+    parser.add_argument('-c', '--continuum-output', action='store_true',
+                        dest='c', help='''Write the continuum fit for each 
+                        input x value after the (optional) original input data 
+                        and before the continuum removed data.''')
     parser.add_argument('-v', '--verbose', action='store_true', dest='v', 
-            help='Give status information during processing.')
+                        help='Give status information during processing.')
     
-    return(parser.parse_args())
+    return parser.parse_args()
+
 
 def read_input_file(input_filename, input_delimiter, whitespace_flag, 
                     lines_to_skip, verbose_flag):
@@ -127,8 +132,8 @@ def read_input_file(input_filename, input_delimiter, whitespace_flag,
             to a float. (e.g. the read data is not numeric)
 
     """
-    if verbose_flag: print('Reading input file...')
-
+    if verbose_flag:
+        print('Reading input file...')
 
     # Check for the version of python being used and use appropriate flags for
     # opening the input file as necessary
@@ -137,33 +142,28 @@ def read_input_file(input_filename, input_delimiter, whitespace_flag,
         kwargs = {}
     else:
         raccess = 'rt'
-        kwargs = {'newline':''}
+        kwargs = {'newline': ''}
     
     try:
         with open(input_filename, raccess, **kwargs) as infile:
             if whitespace_flag:
-                rawdata=[line.split() for line in itertools.islice(infile,
-                lines_to_skip, None)]
+                rawdata = [line.split() for line in itertools.islice(infile,
+                           lines_to_skip, None)]
             else:
-                rawdata=[line.split(input_delimiter) for line in \
-                    itertools.islice(infile, lines_to_skip, None)]
+                rawdata = [line.split(input_delimiter) for line in
+                           itertools.islice(infile, lines_to_skip, None)]
         if not rawdata:
             sys.exit('No data in file ' + input_filename)
     except IOError as e:
         sys.exit('I/O error: file {}: {}'.format(input_filename, e))
-    except:
-        sys.exit('Unexpected error: {}'.format(sys.exc_info()))
-    
-    try:
-        data = [[float(astring) for astring in inner] for inner in rawdata]
-    except:
-        # This is most likely to occur in the even that the data read from the
-        # input file is not numeric. It could also happen if the delimiter was
-        # not correctly specified.
-        sys.exit('''Converting strings to floats failed. Check input data and\
-        delimiter. Error: {}'''.format(sys.exc_info()))
 
-    return(data)
+    data = [[float(astring) for astring in inner] for inner in rawdata]
+    # If this fails, it is likely that the data read from the input file is not
+    #  numeric. It could also happen if the delimiter was not correctly
+    # specified.
+
+    return data
+
 
 def remove_continuum(data, xa, xb, verbose_flag):
     """A function to remove the linear continuum between two points.
@@ -194,19 +194,20 @@ def remove_continuum(data, xa, xb, verbose_flag):
             will be the continuum-removed y data.
     
     """
-    if args.v: print('Calculating continuum line')
+    if verbose_flag:
+        print('Calculating continuum line')
     
-    startx=xa
-    stopx=xb
-    starty=data[int(xa)-int(data[0][0])][1]
-    stopy=data[int(xb)-int(data[0][0])][1]
+    startx = xa
+    stopx = xb
+    starty = data[int(xa)-int(data[0][0])][1]
+    stopy = data[int(xb)-int(data[0][0])][1]
     
     if verbose_flag: 
         print('Start: (' + str(startx) + ',' + str(starty) + ')')
         print('Stop: (' + str(stopx) + ',' + str(stopy) + ')')
     
-    slope=(stopy-starty)/(stopx-startx)
-    intercept=starty-(slope*startx)
+    slope = (stopy-starty)/(stopx-startx)
+    intercept = starty-(slope*startx)
     
     if verbose_flag:
         print('Continuum equation: y=' + str(slope) + '*x+' + str(intercept))
@@ -214,14 +215,13 @@ def remove_continuum(data, xa, xb, verbose_flag):
     
     output = []
     for element in data:
-        continuum=slope*element[0]+intercept
-        tempoutput = [element[0]]
-        tempoutput.append(element[1])
-        tempoutput.append(continuum)
-        tempoutput.append(element[1]/continuum)
-        output.append(tempoutput)
+        continuum = slope*element[0]+intercept
+        crdata = element[1]/continuum
+        temp_output = [element[0], element[1], continuum, crdata]
+        output.append(temp_output)
 
-    return(output)
+    return output
+
 
 def write_cont_removed_output(output, output_filename, write_input_flag,
                               write_cont_flag, verbose_flag):
@@ -249,7 +249,8 @@ def write_cont_removed_output(output, output_filename, write_input_flag,
             arguments passed to the function.
 
 """
-    if verbose_flag: print('Writing output file')
+    if verbose_flag:
+        print('Writing output file')
 
     # Check for the version of python being used and use appropriate flags for
     # opening the input file as necessary
@@ -283,8 +284,9 @@ def write_cont_removed_output(output, output_filename, write_input_flag,
 
             writer.writerow(header)
             writer.writerows(filtered_output)
-    except:
-       sys.exit('Output file error: {}'.format(sys.exc_info()))
+    except IOError as e:
+        sys.exit('Output file error: {}, {}'.format(e, sys.exc_info()))
+
 
 if __name__ == '__main__':
     args = parse_cmdln_args()

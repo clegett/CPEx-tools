@@ -36,7 +36,7 @@ from enum import Enum
 __author__ = 'Carey Legett'
 __contact__ = 'carey.legett@stonybrook.edu'
 __copyright__ = 'Copyright 2018, Stony Brook University'
-__credits__ = ['Carey Legett', 'freenode #r/linux', 'freenode #python']
+__credits__ = ['Carey Legett', 'Freenode #r/linux', 'Freenode #python']
 __date__ = '2018/02/19'
 __deprecated__ = False
 __email__ = 'carey.legett@stonybrook.edu'
