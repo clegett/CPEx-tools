@@ -6,7 +6,13 @@ MSTM Model Manager program.
 
 Classes:
     Sphere
-    ModelOptions
+    ModelOption
+    ModelOptionValue
+    RunType
+    ModelRun
+    Grain
+    Cluster
+    Pack
 
 """
 
@@ -16,6 +22,14 @@ import random
 import sys
 from enum import Enum
 
+__author__ = 'Carey Legett'
+__copyright__ = 'Copyright 2018, Stony Brook University'
+__credits__ = ['Carey Legett']
+
+__version__ = '1.0'
+__maintainer = 'Carey Legett'
+__email__ = 'carey.legett@stonybrook.edu'
+__status__ = 'Development'
 
 class Sphere:
     """A class describing the spheres used in the MSTM model
@@ -97,11 +111,32 @@ class Sphere:
                     another_sphere.y) ** 2 + (self.z - another_sphere.z) ** 2))
 
     def geom_x_sec(self):
-        """Return the geometric cross section of this sphere."""
+        """Return the geometric cross sectional area of this sphere."""
         return math.pi * self.r ** 2
 
 
 class ModelOption:
+    """A class to store a name and value of an option for the MSTM model.
+
+    This class holds a name and a value of a single option to be passed to the
+    MSTM model in an input file. It is primarily intended to be used with the
+    module level dictionary 'opt_dict' which initializes one ModelOption for
+    every possible valid option.
+
+    Attributes:
+        name (str): the name of the MSTM model option
+        y (float): the y coordinate for the center of the sphere
+        z (float): the z coordinate for the center of the sphere
+        r (float): the radius of the sphere
+        n (float): the real portion of the index of refraction
+        k (float): the imaginary portion of the index of refraction (extinction
+            coefficient)
+        real_chiral (float): the real portion of the chiral factor beta
+        imag_chiral (float): the imaginary portion of the chiral factor beta
+        tmatrix_file (Str): the name of the file containing the previously
+        calculated T-matrix for this sphere
+
+    """
     def __init__(self, name, default_value):
         self.name = name
         self.default_value = default_value
