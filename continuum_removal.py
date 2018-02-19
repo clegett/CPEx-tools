@@ -7,6 +7,17 @@ the data such that the linear fit has a value of 1. Output writes to a CSV file
 with two to four columns: "x, [y,] [continuum,] continuum_removed_y" as
 controlled by command line arguments.
 
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import argparse
@@ -16,13 +27,16 @@ import os
 import csv
 
 __author__ = 'Carey Legett'
+__contact__ = 'carey.legett@stonybrook.edu'
 __copyright__ = 'Copyright 2018, Stony Brook University'
-__credits__ = ['Carey Legett']
-
-__version__ = '1.0'
-__maintainer__ = 'Carey Legett'
+__credits__ = ['Carey Legett', 'freenode #r/linux', 'freenode #python']
+__date__ = '2018/02/19'
+__deprecated__ = False
 __email__ = 'carey.legett@stonybrook.edu'
-__status__ = 'Production'
+__license__ = 'GPLv3'
+__maintainer = 'Carey Legett'
+__status__ = 'Development'
+__version__ = '1.0'
 
 def parse_cmdln_args():
     """A function to parse command line arguments for this module.
