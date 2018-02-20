@@ -62,7 +62,7 @@ def parse_cmdln_args():
 
     parser = argparse.ArgumentParser(prog='continuum_removal.py',
                                      description=__doc__,
-                                     epilog='''For more information contact\ 
+                                     epilog='''For more information contact 
                                      Chip at carey.legett@stonybrook.edu.''')
     parser.add_argument('-f', '--input-file', required=True,
                         help='''The name of the input file (include path if the
@@ -153,19 +153,19 @@ def read_input_file(input_filename, input_delimiter, whitespace_flag,
                 rawdata = [line.split(input_delimiter) for line in
                            itertools.islice(infile, lines_to_skip, None)]
         if not rawdata:
-            sys.exit('No data in file ' + input_filename)
+            sys.exit('No data in file {}'.format(input_filename))
     except IOError as e:
         sys.exit('I/O error: file {}: {}'.format(input_filename, e))
 
-    data = [[float(astring) for astring in inner] for inner in rawdata]
+    mydata = [[float(astring) for astring in inner] for inner in rawdata]
     # If this fails, it is likely that the data read from the input file is not
     #  numeric. It could also happen if the delimiter was not correctly
     # specified.
 
-    return data
+    return mydata
 
 
-def remove_continuum(data, xa, xb, verbose_flag):
+def remove_continuum(mydata, xa, xb, verbose_flag):
     """A function to remove the linear continuum between two points.
     
     This function takes a list of lists of floats containing x,y data, a
@@ -176,7 +176,7 @@ def remove_continuum(data, xa, xb, verbose_flag):
     of absorptions in spectroscopic data.
     
     Args:
-        data ([float, float]): A list of lists of two floats representing the
+        mydata ([float, float]): A list of lists of two floats representing the
             unnormalized initial data.
         xa (float): The value of x at which to start the linear fit. This
             must be an x value contained in the data list since no searching
@@ -203,27 +203,27 @@ def remove_continuum(data, xa, xb, verbose_flag):
     stopy = data[int(xb)-int(data[0][0])][1]
     
     if verbose_flag: 
-        print('Start: (' + str(startx) + ',' + str(starty) + ')')
-        print('Stop: (' + str(stopx) + ',' + str(stopy) + ')')
+        print('Start: ({!s},{!s})'.format(startx, starty))
+        print('Stop: ({!s},{!s})'.format(stopx, stopy))
     
     slope = (stopy-starty)/(stopx-startx)
     intercept = starty-(slope*startx)
     
     if verbose_flag:
-        print('Continuum equation: y=' + str(slope) + '*x+' + str(intercept))
+        print('Continuum equation: y={}*x+{}'.format(slope, intercept))
         print('Removing continuum')
     
-    output = []
-    for element in data:
+    this_output = []
+    for element in mydata:
         continuum = slope*element[0]+intercept
         crdata = element[1]/continuum
         temp_output = [element[0], element[1], continuum, crdata]
-        output.append(temp_output)
+        this_output.append(temp_output)
 
-    return output
+    return this_output
 
 
-def write_cont_removed_output(output, output_filename, write_input_flag,
+def write_cont_removed_output(myoutput, output_filename, write_input_flag,
                               write_cont_flag, verbose_flag):
     """A function to write the provided list of lists of floats to a CSV file.
     
@@ -232,7 +232,7 @@ def write_cont_removed_output(output, output_filename, write_input_flag,
     calculated continuum for each x value.
     
     Args:
-        output ([float, float, float, float]): A list of lists of four floats
+        myoutput ([float, float, float, float]): A list of lists of four floats
             that will be written, in part or in whole to the output file.
         output_filename (str): The name of the output file.
         write_input_flag (bool): True if we want to include the original data
@@ -259,7 +259,7 @@ def write_cont_removed_output(output, output_filename, write_input_flag,
         kwargs = {}
     else:
         waccess = 'w'
-        kwargs = {'newline':''}
+        kwargs = {'newline': ''}
 
     try:
         with open(output_filename, waccess, **kwargs) as outfile:
@@ -267,7 +267,7 @@ def write_cont_removed_output(output, output_filename, write_input_flag,
             header = ['x']
             filtered_output = []
 
-            for line in output:
+            for line in myoutput:
                 temp = [line[0]]
                 if write_input_flag:
                     temp.append(line[1])

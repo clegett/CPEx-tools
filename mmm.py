@@ -138,8 +138,8 @@ class Sphere(object):
         elif self.k is None:
             raise ValueError('attribute k cannot be None')
         else:
-            return '{r!s}\t{x!s}\t{y!s}\t{z!s}\t{n!s}\t{k!s}' \
-                   ''.format(**self.__dict__)
+            return('{r!s}\t{x!s}\t{y!s}\t{z!s}\t{n!s}\t{k!s}'
+                   ''.format(**self.__dict__))
 
     def get_tabbed_chiral(self):
         if self.n is None:
@@ -151,15 +151,15 @@ class Sphere(object):
         elif self.imag_chiral is None:
             raise ValueError('attribute imag_chiral cannot be None')
         else:
-            return '{r!s}\t{x!s}\t{y!s}\t{z!s}\t{n!s}\t{k!s}\t' \
-                   '{real_chiral!s}\t{imag_chiral!s}'.format(**self.__dict__)
+            return('{r!s}\t{x!s}\t{y!s}\t{z!s}\t{n!s}\t{k!s}\t'
+                   '{real_chiral!s}\t{imag_chiral!s}'.format(**self.__dict__))
 
     def get_tabbed_tmatrix(self):
         if self.tmatrix_file is None:
             raise ValueError('attribute tmatrix_file cannot be None')
         else:
-            return '{r!s}\t{x!s}\t{y!s}\t{z!s}\t{tmatrix_file!s}' \
-                   ''.format(**self.__dict__)
+            return('{r!s}\t{x!s}\t{y!s}\t{z!s}\t{tmatrix_file!s}'
+                   ''.format(**self.__dict__))
 
 
 class ModelOption(object):
@@ -388,8 +388,8 @@ class Grain(object):
             phi = math.acos(2 * random.random()-1)
 
             arandom = random.random()
-            r = ((dr_rim - (2 * r_incl) - 0.0004) * arandom) + \
-                ((r_host + r_incl) + 0.0002)
+            r = (((dr_rim - (2 * r_incl) - 0.0004) * arandom) +
+                 ((r_host + r_incl) + 0.0002))
             this_x = (r * math.cos(theta) * math.sin(phi)) + x
             this_y = (r * math.sin(theta) * math.sin(phi)) + y
             this_z = (r * math.cos(phi)) + z
