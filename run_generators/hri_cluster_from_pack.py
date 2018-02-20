@@ -34,26 +34,27 @@ __version__ = '1.0'
 def main():
     """
     INPUT VARIABLES
-
+    ############################################################################
     Edit this section to change the parameters of the MSTM run
     """
-    rhost = 500
-    drrim = 100
-    rincl = 10
-    nincl = 100
-    mypack = mmm.Pack.from_file('example_input/10.dat')
-    spheres_in_pack = 10
-    ocfile = 'example_input/rerun_oc.csv'
+    rhost = 500         # Radius of the host particle
+    drrim = 100         # Thickness of the rim
+    rincl = 10          # Radius of the inclusions in the rim
+    nincl = 100         # Number of inclusions in the rim
+    mypack = mmm.Pack.from_file('example_input/10.dat')  # Location of pack file
+    spheres_in_pack = 10    # Number of spheres in the pack
+    ocfile = 'example_input/rerun_oc.csv'   # Optical constants file
 
-    queue = 'devel'
-    cpumodel = 'bro'
-    nodes = 100
-    tpn = 28
-    walltime = '1:59:00'
+    queue = 'devel'     # Pleiades queue name
+    cpumodel = 'bro'    # Pleiades processor model
+    nodes = 100         # Pleiades number of nodes to request
+    tpn = 28            # Pleiades threads per node
+    walltime = '1:59:00'  # Pleiades walltime to request
 
     """
     End of input variables section. You probably do NOT want to edit anything 
     below here.
+    ############################################################################
     """
 
     runname = '{!s}x{!s}-{!s}-{!s}-{!s}'.format(spheres_in_pack, rhost, drrim,
@@ -83,7 +84,8 @@ def main():
                                                        rincl, nincl))
 
     myrun = mmm.ModelRun(name=runname, fixed_or_random=mmm.RunType.FIXED)
-    myrun.set_option('number_spheres', (1 + 1 + nincl) * len(mycluster.grainlist))
+    myrun.set_option('number_spheres', (1 + 1 + nincl) *
+                     len(mycluster.grainlist))
     myrun.set_option('max_number_iterations', 5000)
 
     try:
@@ -103,9 +105,11 @@ def main():
                 myrun.set_option('length_scale_factor',
                                  (2 * math.pi / float(line[0])))
                 myrun.set_option('output_file',
-                                 '{}dat/{}.nm.dat'.format(runoutputdir, line[0]))
+                                 '{}dat/{}.nm.dat'.format(runoutputdir,
+                                                          line[0]))
                 myrun.set_option('scattering_coefficient_file',
-                                 '{}sc/{}.nm.sc.dat'.format(runoutputdir, line[0]))
+                                 '{}sc/{}.nm.sc.dat'.format(runoutputdir,
+                                                            line[0]))
                 myrun.set_option('run_print_file',
                                  '{}run_print.dat'.format(runoutputdir))
                 myrun.set_option('azimuth_average_scattering_matrix', 1)
@@ -154,8 +158,8 @@ def main():
             print('spheres in pack: {!s}'.format(spheres_in_pack), file=stats)
             print('cluster packing fraction: {!s}'
                   ''.format(mycluster.get_packing_fraction()), file=stats)
-            print('cluster x-section: {!s}'.format(mycluster.get_geom_xsection()),
-                  file=stats)
+            print('cluster x-section: {!s}'.format(
+                mycluster.get_geom_xsection()), file=stats)
             print('cluster bounding sphere radius: {}'
                   ''.format(mycluster.get_bounding_sphere().r), file=stats)
     except IOError as e:
