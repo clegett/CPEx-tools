@@ -200,8 +200,8 @@ if __name__ == '__main__':
     nincl_outer = [[None, 64, 640, 6400],
                    [8, 80, 800, 8000],
                    [1, 10, 100, 1000],
-                   [2, 20, 200, 2000],
-                   [1, 10, 100, 1000]]
+                   [2, 20, 200, None],
+                   [1, 10, 100, None]]
     spheres_in_pack_outer = [2, 3, 5, 10, 25, 50]
     pack_directory_outer = 'packs/'
     queue_outer = 'normal'
