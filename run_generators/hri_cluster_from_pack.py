@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+"""This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option) any
+later version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
@@ -22,7 +22,7 @@ __author__ = 'Carey Legett'
 __contact__ = 'carey.legett@stonybrook.edu'
 __copyright__ = 'Copyright 2018, Stony Brook University'
 __credits__ = ['Carey Legett', 'Freenode #r/linux', 'Freenode #python']
-__date__ = '2018/02/19'
+__date__ = '2018/02/21'
 __deprecated__ = False
 __email__ = 'carey.legett@stonybrook.edu'
 __license__ = 'GPLv3'
@@ -31,31 +31,104 @@ __status__ = 'Development'
 __version__ = '1.0'
 
 
-def main():
+def main(rhost=None, drrim=None, rincl=None, nincl=None, spheres_in_pack=None,
+         pack_directory= None, queue=None, cpumodel=None, nodes=None, tpn=None,
+         walltime=None):
     """
     INPUT VARIABLES
-    ############################################################################
-    Edit this section to change the parameters of the MSTM run
+    ###########################################################################
+    Edit this section to change the parameters of the MSTM run IF YOU ARE NOT
+    PASSING IN VALUES WHEN YOU CALL THIS FUNCTION.
     """
-    rhost = 500         # Radius of the host particle
-    drrim = 100         # Thickness of the rim
-    rincl = 10          # Radius of the inclusions in the rim
-    nincl = 100         # Number of inclusions in the rim
-    mypack = mmm.Pack.from_file('example_input/10.dat')  # Location of pack file
-    spheres_in_pack = 10    # Number of spheres in the pack
-    ocfile = 'example_input/rerun_oc.csv'   # Optical constants file
+    rhost_default = 500         # Radius of the host particle
+    drrim_default = 100         # Thickness of the rim
+    rincl_default = 10          # Radius of the inclusions in the rim
+    nincl_default = 100         # Number of inclusions in the rim
+    spheres_in_pack_default = 10  # Number of spheres in the pack
+    pack_directory = 'example_input/'
+    ocfile = 'example_input/rerun_oc.csv'  # Optical constants file
 
-    queue = 'devel'     # Pleiades queue name
-    cpumodel = 'bro'    # Pleiades processor model
-    nodes = 100         # Pleiades number of nodes to request
-    tpn = 28            # Pleiades threads per node
-    walltime = '1:59:00'  # Pleiades walltime to request
-
+    queue_default = 'devel'
+    cpumodel_default = 'bro'
+    nodes_default = 100
+    tpn_default = 28
+    walltime_default = '1:59:00'
     """
     End of input variables section. You probably do NOT want to edit anything 
     below here.
     ############################################################################
     """
+
+    if rhost is None:
+        rhost = rhost_default
+    elif isinstance(rhost, list):
+        multiple_rhost = True
+    else:
+        multiple_rhost = False
+
+    if drrim is None:
+        drrim = drrim_default
+    elif isinstance(drrim, list):
+        multiple_drrim = True
+    else:
+        multiple_drrim = False
+
+    if rincl is None:
+        rincl = rincl_default
+    elif isinstance(rincl, list):
+        multiple_rincl = True
+    else:
+        multiple_rincl = False
+
+    if nincl is None:
+        nincl = nincl_default
+    elif isinstance(nincl, list):
+        multiple_nincl = True
+    else:
+        multiple_nincl = False
+
+    if spheres_in_pack is None:
+        spheres_in_pack = spheres_in_pack_default
+        mypack = mmm.Pack.from_file('{}{}.dat'.format(pack_directory,
+                                                      spheres_in_pack))
+        multiple_packs = False
+    elif isinstance(spheres_in_pack, list):
+        multiple_packs = True
+        mypack = []
+        for pack in spheres_in_pack:
+            mypack.append(mmm.Pack.from_file(
+                '{}{}.dat'.format(pack_directory, pack)))
+    else:
+        multiple_packs = False
+        mypack = mmm.Pack.from_file('{}{}.dat'.format(pack_directory,
+                                                      spheres_in_pack))
+
+    if queue is None:
+        queue = queue_default
+    elif isinstance(queue, list):
+        multiple_queue = True
+    else:
+        multiple_queue = False
+
+    if cpumodel is None:
+        cpumodel = cpumodel_default
+
+    if nodes is None:
+        nodes = nodes_default
+    elif isinstance(nodes, list):
+        multiple_nodes = True
+    else:
+        multiple_nodes = False
+
+    if tpn is None:
+        tpn = tpn_default
+
+    if walltime is None:
+        walltime = walltime_default
+    elif isinstance(walltime, list):
+        multiple_walltime = True
+    else:
+        multiple_walltime = False
 
     runname = '{!s}x{!s}-{!s}-{!s}-{!s}'.format(spheres_in_pack, rhost, drrim,
                                                 rincl, nincl)
