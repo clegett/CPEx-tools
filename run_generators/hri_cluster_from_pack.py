@@ -40,10 +40,10 @@ def generate_run(rhost=None, drrim=None, rincl=None, nincl=None,
     rincl_default = 10          # Radius of the inclusions in the rim
     nincl_default = 100         # Number of inclusions in the rim
     spheres_in_pack_default = 10  # Number of spheres in the pack
-    pack_directory_default = 'example_input/'
-    ocfile = 'example_input/rerun_oc.csv'  # Optical constants file
+    pack_directory_default = 'packs/'
+    ocfile = 'rerun_oc.csv'  # Optical constants file
 
-    queue_default = 'devel'
+    queue_default = 'normal'
     cpumodel_default = 'bro'
     nodes_default = 100
     tpn_default = 28
@@ -217,27 +217,27 @@ if __name__ == '__main__':
     number_of_runs_outer = (len(rincl_outer) * len(nincl_outer[0]) *
                             len(spheres_in_pack_outer))
     for nsphere in spheres_in_pack_outer:
-        for radius in rincl_outer:
-            for nums in nincl_outer:
-                for num in nums:
-                    if num is not None:
-                        if (num * nsphere) < 1000:
-                            use_nodes = nodes_outer[0]
-                            use_time = walltime_outer[0]
-                        elif 1000 <= (num * nsphere) < 10000:
-                            use_nodes = nodes_outer[1]
-                            use_time = walltime_outer[1]
-                        elif 10000 <= (num * nsphere) < 50000:
-                            use_nodes = nodes_outer[1]
-                            use_time = walltime_outer[2]
-                        else:
-                            use_nodes = nodes_outer[2]
-                            use_time = walltime_outer[2]
-                        generate_run(rhost=rhost_outer, drrim=drrim_outer,
-                                     rincl=radius, nincl=num,
-                                     spheres_in_pack=nsphere,
-                                     pack_directory=pack_directory_outer,
-                                     queue=queue_outer,
-                                     cpumodel=cpumodel_outer,
-                                     nodes=use_nodes, tpn=tpn_outer,
-                                     walltime=use_time)
+        for c, radius in enumerate(rincl_outer):
+            for num in nincl_outer[c]:
+                if num is not None:
+                    if (num * nsphere) < 1000:
+                        use_nodes = nodes_outer[0]
+                        use_time = walltime_outer[0]
+                    elif 1000 <= (num * nsphere) < 10000:
+                        use_nodes = nodes_outer[1]
+                        use_time = walltime_outer[1]
+                    elif 10000 <= (num * nsphere) < 25000:
+                        use_nodes = nodes_outer[1]
+                        use_time = walltime_outer[2]
+                    elif 25000 <= (num * nsphere) < 100000:
+                        use_nodes = nodes_outer[2]
+                        use_time = walltime_outer[2]
+                    else:
+                        break  # too many spheres for now
+                    generate_run(rhost=rhost_outer, drrim=drrim_outer,
+                                 rincl=radius, nincl=num,
+                                 spheres_in_pack=nsphere,
+                                 pack_directory=pack_directory_outer,
+                                 queue=queue_outer, cpumodel=cpumodel_outer,
+                                 nodes=use_nodes, tpn=tpn_outer,
+                                 walltime=use_time)
