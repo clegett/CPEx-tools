@@ -31,15 +31,10 @@ __status__ = 'Development'
 __version__ = '1.0'
 
 
-def main(rhost=None, drrim=None, rincl=None, nincl=None, spheres_in_pack=None,
-         pack_directory=None, queue=None, cpumodel=None, nodes=None, tpn=None,
-         walltime=None):
-    """
-    INPUT VARIABLES
-    ###########################################################################
-    Edit this section to change the parameters of the MSTM run IF YOU ARE NOT
-    PASSING IN VALUES WHEN YOU CALL THIS FUNCTION.
-    """
+def generate_run(rhost=None, drrim=None, rincl=None, nincl=None,
+                 spheres_in_pack=None, pack_directory=None, queue=None,
+                 cpumodel=None, nodes=None, tpn=None, walltime=None):
+
     rhost_default = 500         # Radius of the host particle
     drrim_default = 100         # Thickness of the rim
     rincl_default = 10          # Radius of the inclusions in the rim
@@ -53,11 +48,6 @@ def main(rhost=None, drrim=None, rincl=None, nincl=None, spheres_in_pack=None,
     nodes_default = 100
     tpn_default = 28
     walltime_default = '1:59:00'
-    """
-    End of input variables section. You probably do NOT want to edit anything 
-    below here.
-    ###########################################################################
-    """
 
     if rhost is None:
         rhost = rhost_default
@@ -199,4 +189,55 @@ def main(rhost=None, drrim=None, rincl=None, nincl=None, spheres_in_pack=None,
 
 
 if __name__ == '__main__':
-    main()
+    """
+    INPUT VARIABLES
+    ###########################################################################
+    Edit this section to change the parameters of the MSTM run.
+    """
+    rhost_outer = 500
+    drrim_outer = 100
+    rincl_outer = [5, 10, 20, 32, 43]
+    nincl_outer = [[None, 64, 640, 6400],
+                   [8, 80, 800, 8000],
+                   [1, 10, 100, 1000],
+                   [2, 20, 200, 2000],
+                   [1, 10, 100, 1000]]
+    spheres_in_pack_outer = [2, 3, 5, 10, 25, 50]
+    pack_directory_outer = 'packs/'
+    queue_outer = 'normal'
+    cpumodel_outer = 'bro'
+    nodes_outer = [50, 100, 200]
+    tpn_outer = 28
+    walltime_outer = ['0:59:00', '3:59:00', '7:59:00']
+    """
+    END OF INPUT VARIABLES
+    Do not edit code below here unless you know what you're doing!
+    ###########################################################################
+    """
+    number_of_runs_outer = (len(rincl_outer) * len(nincl_outer[0]) *
+                            len(spheres_in_pack_outer))
+    for nsphere in spheres_in_pack_outer:
+        for radius in rincl_outer:
+            for nums in nincl_outer:
+                for num in nums:
+                    if num is not None:
+                        if (num * nsphere) < 1000:
+                            use_nodes = nodes_outer[0]
+                            use_time = walltime_outer[0]
+                        elif 1000 <= (num * nsphere) < 10000:
+                            use_nodes = nodes_outer[1]
+                            use_time = walltime_outer[1]
+                        elif 10000 <= (num * nsphere) < 50000:
+                            use_nodes = nodes_outer[1]
+                            use_time = walltime_outer[2]
+                        else:
+                            use_nodes = nodes_outer[2]
+                            use_time = walltime_outer[2]
+                        generate_run(rhost=rhost_outer, drrim=drrim_outer,
+                                     rincl=radius, nincl=num,
+                                     spheres_in_pack=nsphere,
+                                     pack_directory=pack_directory_outer,
+                                     queue=queue_outer,
+                                     cpumodel=cpumodel_outer,
+                                     nodes=use_nodes, tpn=tpn_outer,
+                                     walltime=use_time)
