@@ -32,7 +32,7 @@ __version__ = '1.0'
 
 
 def main(rhost=None, drrim=None, rincl=None, nincl=None, spheres_in_pack=None,
-         pack_directory= None, queue=None, cpumodel=None, nodes=None, tpn=None,
+         pack_directory=None, queue=None, cpumodel=None, nodes=None, tpn=None,
          walltime=None):
     """
     INPUT VARIABLES
@@ -45,7 +45,7 @@ def main(rhost=None, drrim=None, rincl=None, nincl=None, spheres_in_pack=None,
     rincl_default = 10          # Radius of the inclusions in the rim
     nincl_default = 100         # Number of inclusions in the rim
     spheres_in_pack_default = 10  # Number of spheres in the pack
-    pack_directory = 'example_input/'
+    pack_directory_default = 'example_input/'
     ocfile = 'example_input/rerun_oc.csv'  # Optical constants file
 
     queue_default = 'devel'
@@ -56,79 +56,37 @@ def main(rhost=None, drrim=None, rincl=None, nincl=None, spheres_in_pack=None,
     """
     End of input variables section. You probably do NOT want to edit anything 
     below here.
-    ############################################################################
+    ###########################################################################
     """
 
     if rhost is None:
         rhost = rhost_default
-    elif isinstance(rhost, list):
-        multiple_rhost = True
-    else:
-        multiple_rhost = False
-
     if drrim is None:
         drrim = drrim_default
-    elif isinstance(drrim, list):
-        multiple_drrim = True
-    else:
-        multiple_drrim = False
-
     if rincl is None:
         rincl = rincl_default
-    elif isinstance(rincl, list):
-        multiple_rincl = True
-    else:
-        multiple_rincl = False
-
     if nincl is None:
         nincl = nincl_default
-    elif isinstance(nincl, list):
-        multiple_nincl = True
-    else:
-        multiple_nincl = False
-
+    if pack_directory is None:
+        pack_directory = pack_directory_default
     if spheres_in_pack is None:
         spheres_in_pack = spheres_in_pack_default
         mypack = mmm.Pack.from_file('{}{}.dat'.format(pack_directory,
                                                       spheres_in_pack))
-        multiple_packs = False
-    elif isinstance(spheres_in_pack, list):
-        multiple_packs = True
-        mypack = []
-        for pack in spheres_in_pack:
-            mypack.append(mmm.Pack.from_file(
-                '{}{}.dat'.format(pack_directory, pack)))
     else:
-        multiple_packs = False
         mypack = mmm.Pack.from_file('{}{}.dat'.format(pack_directory,
                                                       spheres_in_pack))
 
     if queue is None:
         queue = queue_default
-    elif isinstance(queue, list):
-        multiple_queue = True
-    else:
-        multiple_queue = False
-
     if cpumodel is None:
         cpumodel = cpumodel_default
-
     if nodes is None:
         nodes = nodes_default
-    elif isinstance(nodes, list):
-        multiple_nodes = True
-    else:
-        multiple_nodes = False
-
     if tpn is None:
         tpn = tpn_default
-
     if walltime is None:
         walltime = walltime_default
-    elif isinstance(walltime, list):
-        multiple_walltime = True
-    else:
-        multiple_walltime = False
 
     runname = '{!s}x{!s}-{!s}-{!s}-{!s}'.format(spheres_in_pack, rhost, drrim,
                                                 rincl, nincl)
