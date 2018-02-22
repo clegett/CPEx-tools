@@ -444,9 +444,10 @@ class Grain(object):
         mylist = [self.host_sphere.get_tabbed_rxyznk(), '\n',
                   self.rim.get_tabbed_rxyznk(), '\n']
 
-        for inclusion in self.inclusions:
+        for c, inclusion in enumerate(self.inclusions):
             mylist.append(inclusion.get_tabbed_rxyznk())
-            mylist.append('\n')
+            if c < len(self.inclusions - 1):
+                mylist.append('\n')
 
         return ''.join(mylist)
 

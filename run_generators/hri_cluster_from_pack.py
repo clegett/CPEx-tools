@@ -105,9 +105,8 @@ def generate_run(rhost=None, drrim=None, rincl=None, nincl=None,
                                                        rincl, nincl))
 
     myrun = mmm.ModelRun(name=runname, fixed_or_random=mmm.RunType.FIXED)
-    myrun.set_option('number_spheres', (1 + 1 + nincl) *
-                     len(mycluster.grainlist))
-    myrun.set_option('max_number_iterations', 5000)
+    myrun.set_option('number_spheres', (1 + 1 + nincl) * spheres_in_pack)
+    myrun.set_option('max_number_iterations', 10000)
 
     try:
         os.makedirs(outdir)
