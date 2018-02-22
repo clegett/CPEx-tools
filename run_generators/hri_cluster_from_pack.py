@@ -233,6 +233,11 @@ if __name__ == '__main__':
                         use_time = walltime_outer[2]
                     else:
                         break  # too many spheres for now
+                    print('Working on{}x{}-{}-{}-{}'.format(nsphere,
+                                                            rhost_outer,
+                                                            drrim_outer,
+                                                            radius, num))
+
                     generate_run(rhost=rhost_outer, drrim=drrim_outer,
                                  rincl=radius, nincl=num,
                                  spheres_in_pack=nsphere,
