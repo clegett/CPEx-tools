@@ -446,7 +446,7 @@ class Grain(object):
 
         for c, inclusion in enumerate(self.inclusions):
             mylist.append(inclusion.get_tabbed_rxyznk())
-            if c < len(self.inclusions - 1):
+            if c < len(self.inclusions) - 1:
                 mylist.append('\n')
 
         return ''.join(mylist)
