@@ -169,7 +169,7 @@ def generate_run(rhost=None, drrim=None, rincl=None, nincl=None,
             print('', file=pbs)
             print('mpiexec -np {!s} ./mstm_ttv2.3.exe {}.inp'
                   ''.format((nodes * tpn), runname), file=pbs)
-            print('mv ~/{}* {}'.format(runname, runoutputdir), file=pbs)
+            print('mv ~/{}.* {}'.format(runname, runoutputdir), file=pbs)
     except IOError as e:
         sys.exit('I/O error: file {}: {}'.format(pbsfile, e))
 
