@@ -23,20 +23,20 @@ import re    # regular expressions, because fml
 import os    # path handling for filenames
 import csv   # csv handling for output file
 import math  # we want access to pi and cosine
-from operator import itemgetter # used to sort the list for output
-import numpy as np
+from operator import itemgetter  # used to sort the list for output
+
 
 # Later on, we're going to need an H function, it is defined here
-def h(mu, gamma) :
+def h(mu, gamma):
     top = 1 + (2 * mu)
     bottom = 1 + (2*gamma*mu)
-    return(top/bottom)
+    return top/bottom
+
 
 # I'm going to have the reflectance calculation be a function just to
 #  keep it a little cleaner down below in the loop where it is used
-def refl(ssa, ideg, edeg, phase=1.0, backscatter=0.0) :
+def refl(ssa, ideg, edeg, phase=1.0, backscatter=0.0):
     """Calculate the Hapke Bidirectional Reflectance Function
-
 
     Keyword arguments:
     ssa -- the single scattering albedo
@@ -51,15 +51,17 @@ def refl(ssa, ideg, edeg, phase=1.0, backscatter=0.0) :
     gamma = math.sqrt(1.0 - ssa)
     hmu0 = h(mu0, gamma)
     hmu = h(mu, gamma)
-    refl = (ssa/(4.0*math.pi))*(mu0/(mu0+mu))*((1.0+backscatter)*phase+(hmu0*hmu)-1.0)
-    return(refl)
+    refl = (ssa / (4 * math.pi)) * (mu0 / (mu0 + mu)) * (
+            (1 + backscatter) * phase + (hmu0 * hmu) - 1)
+    return refl
+
 
 # get list of .dat files in directory
-fileList = glob.glob("*nm.dat")
+fileList = glob.glob('*nm.dat')
 
 # check and see if there is anything in the file list and exit if not
-if (len(fileList) == 0) :
-    sys.exit("No input files found in this directory!\n")
+if len(fileList) == 0:
+    sys.exit('No input files found in this directory!')
 
 #
 # The data list is going to be formatted like this:
@@ -94,7 +96,7 @@ row = 0
 # and set in the loop below before they are used.
 
 s11index = 2
-extSearchString = "unpolarized total ext"
+extSearchString = 'unpolarized total ext'
 
 # In order to calculate the phase function we need to know the geometric
 #  cross section (G) of the particle.
@@ -105,14 +107,14 @@ try:
 except NameError:
     pass
 
-print("\nThis will be used to calculate the geometric cross section:")
-print("What is the RADIUS of the enclosing sphere?")
+print('\nThis will be used to calculate the geometric cross section:')
+print('What is the RADIUS of the enclosing sphere?')
 user_input = input()
 encRadius = float(user_input.strip(' \t\n\r'))
 G = math.pi * encRadius**2
 
 # Loop on all .dat files in directory:
-for currentfile in fileList :
+for currentfile in fileList:
     # open file
     with open(currentfile) as f:
         # get wavelength from filename
@@ -120,12 +122,12 @@ for currentfile in fileList :
         # This will be our super simple state machine switch variable
         state = 0
         # search through file until we find the line before the efficiencies
-        for line in f :
+        for line in f:
             # remove leading and trailing whitespace
             cleanLine = line.strip()
             # State == 1 means we have determined that this line contains
             #  efficiency data and we're going to read it
-            if (state == 1) :
+            if state == 1:
                 state = 0
                 # split string on spaces
                 elements = cleanLine.split()
@@ -143,13 +145,13 @@ for currentfile in fileList :
                 #  break a sqrt later on, if we do this, we set the
                 #  "flag" parameter to 1 so we can make note of it
                 #  in the output file later on
-                if (data[row][5] > 1) :
+                if data[row][5] > 1:
                     data[row][5] = 1
                     data[row][8] = 1
                 continue
             # State == 2 means that the next line contains the 150 degree
             #  scattering matrix data and we're going to read it
-            elif (state == 2) :
+            elif state == 2:
                 # split string on spaces
                 matrix = cleanLine.split()
                 # get S11
@@ -160,7 +162,7 @@ for currentfile in fileList :
                 Csca = data[row][3] * G
                 phase = 4*math.pi*(1/Csca)*dcsca
                 # We now have everything necessary to calculate the reflectance
-                data[row][7] = refl(data[row][5],30.0,0.0,phase)
+                data[row][7] = refl(data[row][5], 30, 0, phase)
                 # reset state machine
                 state = 0
                 # increment row for next file
@@ -168,10 +170,11 @@ for currentfile in fileList :
                 # break out of this file
                 break
             # Here we want to search the line for the text "random orientation
-            #  calculations" to know what type of model run this is. This is necessary
-            #  to determine the correct format of the scattering matrix data used 
-            #  a little further down in this loop
-            elif (re.search("random orientation calculations", cleanLine) != None):
+            #  calculations" to know what type of model run this is. This is
+            # necessary to determine the correct format of the scattering
+            # matrix data used a little further down in this loop
+            elif (re.search('random orientation calculations', cleanLine) is
+                    not None):
                 # This file was output from a random orientation run
                 #  This means that the scattering matrix data is formatted:
                 #   theta 11 12 13 14 22 23 24 33 34 44
@@ -180,30 +183,31 @@ for currentfile in fileList :
                 extSearchString = "total ext"
                 continue
             # Here we want to search the line for the text "fixed orientation
-            #  calculations" to know what type of model run this is. This is necessary
-            #  to determine the correct format of the scattering matrix data used 
-            #  a little further down in this loop
-            elif (re.search("fixed orientation calculations", cleanLine) != None):
+            #  calculations" to know what type of model run this is. This is
+            # necessary to determine the correct format of the scattering
+            # matrix data used a little further down in this loop
+            elif (re.search('fixed orientation calculations', cleanLine) is
+                  not None):
                 # This file was output from a fixed orientation run
                 #  This means that the scattering matrix data is formatted:
                 #   theta phi 11 12 13 14 21 22 23 24 31 32 33 34 41 42 43 44
                 #  we want 11, so we'll grab the third field in a minute
                 s11index = 2
-                extSearchString = "unpolarized total ext"
+                extSearchString = 'unpolarized total ext'
                 continue
             # Here we want to search this line for the phrase "total ext"
             #  if the line contains this text, the next line contains the
             #  efficiency data and we want to catch that on the next loop
-            elif (re.search(extSearchString, cleanLine) != None) :
+            elif re.search(extSearchString, cleanLine) is not None:
                 # The next line contains efficiency data, get ready to catch it
                 state = 1
                 # start the next iteration of the for loop
                 continue
             # Here we want to search the line for "149.00" because this means 
-            #  that the next line contains the scattering matrix information for
-            #  a scattering angle of 150 degrees and we want to catch that on the
-            #  next loop
-            elif (re.search("149.00", cleanLine) != None) :
+            #  that the next line contains the scattering matrix information
+            # for a scattering angle of 150 degrees and we want to catch that
+            # on the next loop
+            elif re.search('149.00', cleanLine) is not None:
                 # The next line contains 150 deg scattering matrix
                 state = 2
                 # start the next iteration of the for loop
@@ -214,6 +218,7 @@ data.sort(key=itemgetter(0))
 # write array to output file
 with open('output.csv', 'w') as out:
     writer = csv.writer(out)
-    writer.writerow(['wavelength','Qext','Qabs','Qsct','Asym','SSA','S11','Refl','flag'])
+    writer.writerow(['wavelength', 'Qext', 'Qabs', 'Qsct', 'Asym', 'SSA',
+                     'S11', 'Refl', 'flag'])
     for values in data:
         writer.writerow(values)
