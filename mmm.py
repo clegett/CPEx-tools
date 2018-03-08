@@ -32,6 +32,9 @@ import attr
 import random
 import sys
 from enum import Enum
+import re
+import glob
+import json
 
 __author__ = 'Carey Legett'
 __contact__ = 'carey.legett@stonybrook.edu'
@@ -590,3 +593,278 @@ class Pack(object):
         self.sphere_coords = [[coord * multiplier for coord in row] for row in
                               self.sphere_coords]
         self.sphere_radius = new_sphere_radius
+
+
+class ModelRunTypeError(Exception):
+    def __init__(self, message):
+        super(ModelRunTypeError, self).__init__(message)
+
+
+class RunOutput(object):
+    def __init__(self, input_dir_name, theta_i=30, theta_e=0):
+        def h(mu, gamma):
+            top = 1 + (2 * mu)
+            bottom = 1 + (2 * gamma * mu)
+            return top/bottom
+
+        input_dir_name = input_dir_name.strip()
+        if not input_dir_name.endswith('/'):
+            input_dir_name.append('/')
+        self.input_dir_name = input_dir_name
+        file_list = glob.glob('{}dat/*.dat'.format(input_dir_name))
+        self.wl_dict = dict()
+        for file in file_list:
+            wl = int(re.search(r'(\d{3,4})nm\.dat', file).group(1))
+            self.wl_dict[wl] = SingleRunOutput.from_dat_file(file)
+            if self.wl_dict[wl].unpol_qext is None:
+                self.wl_dict[wl].incomplete = True
+            else:
+                self.wl_dict[wl].incomplete = False
+        self.wl_list = [*self.wl_dict]
+        self.wl_list.sort()
+
+        stats_file = glob.glob('{}*stats.txt'.format(input_dir_name))
+        if stats_file:
+            try:
+                with open(stats_file[0], 'r') as s:
+                    for line in s:
+                        if re.match(r'runname\:', line) is not None:
+                            self.runname = re.search(r'runname:\s(.+)\n',
+                                                     line).group(1)
+                            continue
+                        if re.match('cluster packing', line) is not None:
+                            self.pack_frac = float(re.search(r':\s(.+)\n',
+                                                             line).group(1))
+                            continue
+                        if re.match('cluster x-section', line) is not None:
+                            self.x_sect = float(re.search(r':\s(.+)\n', line
+                                                          ).group(1))
+                            continue
+                        if re.match('cluster bounding', line) is not None:
+                            self.bound_r = float(re.search(r':\s(.+)\n', line)
+                                                 .group(1))
+                            continue
+            except IOError as e:
+                sys.exit('I/O error: file {}: {}'.format(stats_file, e))
+        else:
+            raise ModelRunTypeError('This model run does not have a stats file'
+                                    '.')
+
+        for wl in self.wl_list:
+            mu0 = math.cos(math.radians(theta_i))
+            mu = math.cos(math.radians(theta_e))
+            self.wl_dict[wl].k = (2 * math.pi) / wl
+            self.wl_dict[wl].dcsca = self.wl_dict[wl].s_matrix_dict['150.00']['11']
+            self.wl_dict[wl].csca = self.wl_dict[wl].unpol_qsca * self.x_sect
+            self.wl_dict[wl].p_g = 4 * math.pi * (1 / self.wl_dict[wl].csca) \
+                                   * self.wl_dict[wl].dcsca
+            self.wl_dict[wl].ssa = (self.wl_dict[wl].unpol_qsca /
+                                    self.wl_dict[wl].unpol_qext)
+            gamma = math.sqrt(1 - self.wl_dict[wl].ssa)
+            hmu0 = h(mu0, gamma)
+            hmu = h(mu, gamma)
+            self.wl_dict[wl].hapke_refl = (self.wl_dict[wl].ssa /
+                                           (4 * math.pi)) * (mu0 / (mu0 + mu))\
+                                          * ((1 + 0) * self.wl_dict[wl].p_g +
+                                             (hmu0 * hmu)-1)
+
+
+    def write_json(self, filename):
+        run_dict = self.__dict__
+        for key, val in run_dict.items():
+            if isinstance(val, dict):
+                for inner_key, inner_val in val.items():
+                    if isinstance(inner_val, SingleRunOutput):
+                        val[inner_key] = inner_val.__dict__
+        try:
+            with open(filename, 'w') as o:
+                json.dump(run_dict, o, indent=1)
+        except IOError as e:
+            sys.exit('I/O error: file {}: {}'.format(filename, e))
+
+
+class SingleRunOutput(object):
+    def __init__(self):
+        self.run_number = None
+        self.n_spheres = None
+        self.vol_size_param = None
+        self.position_file = None
+        self.output_file = None
+        self.length_scale_factor = None
+        self.real_ref_index_scale_factor = None
+        self.imag_ref_index_scale_factor = None
+        self.real_chiral_factor = None
+        self.imag_chiral_factor = None
+        self.incident_or_target_frame = None
+        self.theta_min = None
+        self.theta_max = None
+        self.azimuth_averaged = None
+        self.num_scattering_angles = None
+        self.eps_mie = None
+        self.eps_soln = None
+        self.max_iterations = None
+        self.real_medium_ref_index = None
+        self.imag_medium_ref_index = None
+        self.target_euler_rotation_x = None
+        self.target_euler_rotation_y = None
+        self.target_euler_rotation_z = None
+        self.far_field_kr = None
+        self.iter_per_corr = None
+        self.incident_azimuth_angle = None
+        self.incident_polar_angle = None
+        self.common_exp_eps = None
+        self.sc_file = None
+        self.sphere_data_dict = None
+        self.unpol_qext = None
+        self.unpol_qabs = None
+        self.unpol_qsca = None
+        self.asym = None
+        self.parpol_qext = None
+        self.parpol_qabs = None
+        self.parpol_qsca = None
+        self.perpol_qext = None
+        self.perpol_qabs = None
+        self.perpol_qsca = None
+        self.s_matrix_dict = None
+
+    @classmethod
+    def from_dat_file(cls, filename):
+        thisrun = SingleRunOutput()
+        thisrun.azimuth_averaged = False
+        try:
+            with open(filename, 'r') as f:
+                for line in f:
+                    if (re.search('input parameters for run number', line)
+                            is not None):
+                        thisrun.run_number = int(next(f).strip())
+                        continue
+                    if re.search('number of spheres', line) is not None:
+                        thisrun.n_spheres, thisrun.vol_size_param = \
+                            next(f).split()
+                        thisrun.n_spheres = int(thisrun.n_spheres)
+                        thisrun.vol_size_param = float(thisrun.vol_size_param)
+                        continue
+                    if re.search('position file', line) is not None:
+                        thisrun.position_file = next(f).strip()
+                        continue
+                    if re.search('output file', line) is not None:
+                        thisrun.output_file = next(f).strip()
+                        continue
+                    if re.search('length, ref\. indx', line) is not None:
+                        thisrun.length_scale_factor, \
+                            thisrun.real_ref_index_scale_factor, \
+                            thisrun.imag_ref_index_scale_factor = \
+                            [float(i) for i in next(f).split()]
+                        continue
+                    if re.search('chiral factors:', line) is not None:
+                        thisrun.real_chiral_factor, \
+                            thisrun.imag_chiral_factor = \
+                            [float(i) for i in next(f).split()]
+                        continue
+                    if re.search('based on incident frame', line) is not None:
+                        thisrun.incident_or_target_frame = 'incident'
+                        continue
+                    elif re.search('based on target frame', line) is not None:
+                        thisrun.incident_or_target_frame = 'target'
+                        continue
+                    if re.search('thetamin, thetamax', line) is not None:
+                        thisrun.theta_min, thisrun.theta_max = \
+                            [float(i) for i in next(f).split()]
+                        continue
+                    if (re.search('scattering matrix is averaged', line) is
+                            not None):
+                        thisrun.azimuth_averaged = True
+                        continue
+                    if re.search('number scattering angles', line) is not None:
+                        thisrun.num_scattering_angles = int(next(f).strip())
+                        continue
+                    if re.search('epsmie, epssoln', line) is not None:
+                        temp = next(f).strip()
+                        captures = re.match(
+                            r'(\d*\.\d+E[\+|\-]\d{2})\s*(\d*\.\d+E[\+|\-]\d{2})\s*(\d+)',
+                            temp)
+                        thisrun.eps_mie = float(captures.group(1))
+                        thisrun.eps_soln = float(captures.group(2))
+                        thisrun.max_iterations = int(captures.group(3))
+                        continue
+                    if re.search('medium refractive index', line) is not None:
+                        thisrun.real_medium_ref_index, \
+                            thisrun.imag_medium_ref_index = [float(i) for i in
+                                                         next(f).split()]
+                        continue
+                    if re.search('target euler', line) is not None:
+                        thisrun.target_euler_rotation_x, \
+                            thisrun.target_euler_rotation_y, \
+                            thisrun.target_euler_rotation_z = [float(i) for i
+                                                               in
+                                                               next(f).split()]
+                        continue
+                    if re.search('far field kr', line) is not None:
+                        thisrun.far_field_kr, thisrun.iter_per_corr = \
+                            next(f).split()
+                        thisrun.far_field_kr = float(thisrun.far_field_kr)
+                        thisrun.iter_per_corr = int(thisrun.iter_per_corr)
+                        continue
+                    if re.search('incident azimuth', line) is not None:
+                        thisrun.incident_azimuth_angle, \
+                            thisrun.incident_polar_angle = [float(i) for i in
+                                                            next(f).split()]
+                        continue
+                    if re.search('common expansion', line) is not None:
+                        thisrun.common_exp_eps = float(next(f).strip())
+                        continue
+                    if (re.search('scattering coefficients calculated', line)
+                            is not None):
+                        thisrun.sc_file = next(f).strip()
+                        continue
+                    if (re.search('calculation results for run', line) is
+                            not None):
+                        thisrun.run_number = int(next(f).strip())
+                        continue
+                    if re.search(r'\s*sphere\s*host', line) is not None:
+                        headers = line.split()
+                        line = next(f)
+                        thisrun.sphere_data_dict = dict()
+                        while re.match(r'^\s*\d+', line):
+                            thisrow = line.split()
+                            thisdict = {a: float(b) for a, b in
+                                        zip(headers[1:], thisrow[1:])}
+                            thisdict['host'] = int(thisdict['host'])
+                            thisrun.sphere_data_dict[int(thisrow[0])] = \
+                                thisdict
+                            line = next(f)
+                    if re.search('unpolarized total ext', line) is not None:
+                        thisrun.unpol_qext, thisrun.unpol_qabs, \
+                            thisrun.unpol_qsca, thisrun.asym = \
+                            [float(i) for i in next(f).split()]
+                        continue
+                    if re.search('parallel total ext', line) is not None:
+                        thisrun.parpol_qext, thisrun.parpol_qabs, \
+                            thisrun.parpol_qsca = [float(i) for i in
+                                                   next(f).split()]
+                        continue
+                    if re.search('perpendicular total ext', line) is not None:
+                        thisrun.perpol_qext, thisrun.perpol_qabs, \
+                            thisrun.perpol_qsca = [float(i) for i in
+                                                   next(f).split()]
+                        continue
+                    if (re.search('scattering matrix elements', line) is not
+                        None):
+                        line = next(f)
+                        headers = line.split()
+                        thisrun.s_matrix_dict = dict()
+                        line = next(f)
+                        while re.match(r'^\s*\d+\.\d{2}', line):
+                            thisrow = line.split()
+                            thisdict = {a: float(b) for a, b in
+                                        zip(headers[1:], thisrow[1:])}
+                            thisrun.s_matrix_dict[thisrow[0]] = thisdict
+                            try:
+                                line = next(f)
+                            except StopIteration:
+                                break
+                        continue
+        except IOError as e:
+            sys.exit('I/O error: file {}: {}'.format(filename, e))
+
+        return thisrun
