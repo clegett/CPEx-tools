@@ -35,6 +35,7 @@ from enum import Enum
 import re
 import glob
 import json
+import pickle
 
 __author__ = 'Carey Legett'
 __contact__ = 'carey.legett@stonybrook.edu'
@@ -602,9 +603,9 @@ class ModelRunTypeError(Exception):
 
 class RunOutput(object):
     def __init__(self, input_dir_name, theta_i=30, theta_e=0):
-        def h(mu, gamma):
-            top = 1 + (2 * mu)
-            bottom = 1 + (2 * gamma * mu)
+        def h(a_mu, a_gamma):
+            top = 1 + (2 * a_mu)
+            bottom = 1 + (2 * a_gamma * a_mu)
             return top/bottom
 
         input_dir_name = input_dir_name.strip()
@@ -628,7 +629,7 @@ class RunOutput(object):
             try:
                 with open(stats_file[0], 'r') as s:
                     for line in s:
-                        if re.match(r'runname\:', line) is not None:
+                        if re.match(r'runname:', line) is not None:
                             self.runname = re.search(r'runname:\s(.+)\n',
                                                      line).group(1)
                             continue
@@ -654,10 +655,11 @@ class RunOutput(object):
             mu0 = math.cos(math.radians(theta_i))
             mu = math.cos(math.radians(theta_e))
             self.wl_dict[wl].k = (2 * math.pi) / wl
-            self.wl_dict[wl].dcsca = self.wl_dict[wl].s_matrix_dict['150.00']['11']
+            self.wl_dict[wl].dcsca = \
+                self.wl_dict[wl].s_matrix_dict['150.00']['11']
             self.wl_dict[wl].csca = self.wl_dict[wl].unpol_qsca * self.x_sect
             self.wl_dict[wl].p_g = 4 * math.pi * (1 / self.wl_dict[wl].csca) \
-                                   * self.wl_dict[wl].dcsca
+                * self.wl_dict[wl].dcsca
             self.wl_dict[wl].ssa = (self.wl_dict[wl].unpol_qsca /
                                     self.wl_dict[wl].unpol_qext)
             gamma = math.sqrt(1 - self.wl_dict[wl].ssa)
@@ -665,9 +667,7 @@ class RunOutput(object):
             hmu = h(mu, gamma)
             self.wl_dict[wl].hapke_refl = (self.wl_dict[wl].ssa /
                                            (4 * math.pi)) * (mu0 / (mu0 + mu))\
-                                          * ((1 + 0) * self.wl_dict[wl].p_g +
-                                             (hmu0 * hmu)-1)
-
+                * ((1 + 0) * self.wl_dict[wl].p_g + (hmu0 * hmu)-1)
 
     def write_json(self, filename):
         run_dict = self.__dict__
@@ -679,6 +679,13 @@ class RunOutput(object):
         try:
             with open(filename, 'w') as o:
                 json.dump(run_dict, o, indent=1)
+        except IOError as e:
+            sys.exit('I/O error: file {}: {}'.format(filename, e))
+
+    def write_pickle(self, filename):
+        try:
+            with open(filename, 'wb') as p:
+                pickle.dump(self, p)
         except IOError as e:
             sys.exit('I/O error: file {}: {}'.format(filename, e))
 
@@ -781,8 +788,8 @@ class SingleRunOutput(object):
                     if re.search('epsmie, epssoln', line) is not None:
                         temp = next(f).strip()
                         captures = re.match(
-                            r'(\d*\.\d+E[\+|\-]\d{2})\s*(\d*\.\d+E[\+|\-]\d{2})\s*(\d+)',
-                            temp)
+                            r'(\d*\.\d+E[+|\-]\d{2})\s*(\d*\.\d+E[+|\-]'
+                            r'\d{2})\s*(\d+)', temp)
                         thisrun.eps_mie = float(captures.group(1))
                         thisrun.eps_soln = float(captures.group(2))
                         thisrun.max_iterations = int(captures.group(3))
@@ -790,7 +797,7 @@ class SingleRunOutput(object):
                     if re.search('medium refractive index', line) is not None:
                         thisrun.real_medium_ref_index, \
                             thisrun.imag_medium_ref_index = [float(i) for i in
-                                                         next(f).split()]
+                                                             next(f).split()]
                         continue
                     if re.search('target euler', line) is not None:
                         thisrun.target_euler_rotation_x, \
@@ -849,7 +856,7 @@ class SingleRunOutput(object):
                                                    next(f).split()]
                         continue
                     if (re.search('scattering matrix elements', line) is not
-                        None):
+                            None):
                         line = next(f)
                         headers = line.split()
                         thisrun.s_matrix_dict = dict()
