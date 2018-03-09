@@ -29,20 +29,22 @@ def hapke_refl_plot(a_run_output, absolute=False, output_dir=None,
     plt.xticks(np.arange(700, 1800, 100))
     plt.show()
     if output_dir:
-        fig.savefig('{}{}_refl.png'.format(output_dir, a_run_output.runname))
-    if include_csv:
-        try:
-            with open('{}{}_refl.csv'.format(output_dir, a_run_output.runname),
-                      'w') as o:
-                csvwriter = csv.writer(o, delimiter=',')
-                csvwriter.writerow(['Wavelength', 'Reflectance'])
-                csvwriter.writerows([[x, y] for x, y in zip(wls, refls)])
-        except IOError as e:
-            sys.exit('I/O error: file {}{}_refl.csv: {}'
-                     ''.format(output_dir, a_run_output.runname, e))
+        outfile = '{}{}_refl'.format(output_dir, a_run_output.runname)
+        if absolute:
+            outfile.append('_abs')
+        fig.savefig('{}.png'.format(outfile))
+        if include_csv:
+            try:
+                with open('{}.csv'.format(outfile), 'w') as o:
+                    csvwriter = csv.writer(o, delimiter=',')
+                    csvwriter.writerow(['Wavelength', 'Reflectance'])
+                    csvwriter.writerows([[x, y] for x, y in zip(wls, refls)])
+            except IOError as e:
+                sys.exit('I/O error: file {}{}_refl.csv: {}'
+                         ''.format(output_dir, a_run_output.runname, e))
 
 
-def s11_plots(a_run_output):
+def s11_plots(a_run_output, output_dir=None):
     s11_dict = dict()
     for wl in a_run_output.wl_list:
         inner_s11_dict = dict()
@@ -62,14 +64,17 @@ def s11_plots(a_run_output):
 
         angles = (np.pi / 180) * np.asarray(angles)
         s11s = np.asarray(s11s)
-
+        fig = plt.figure()
         ax = plt.subplots(1, 1, subplot_kw=dict(polar=True))[1]
         plot_logpolar(ax, angles, s11s)
         ax.set_title('{}: {} nm'.format(a_run_output.runname, wl))
+        if output_dir:
+            outfile = '{}{}_{}_s11'.format(output_dir, a_run_output.runname, wl)
+            fig.savefig('{}.png'.format(outfile))
         plt.show()
 
 
-def s11_plot_all(a_run_output):
+def s11_plot_all(a_run_output, output_dir=None):
     colors = {1700: '#FF0000', 1600: '#FA7500', 1500: '#F6E700', 1400: '#8EF100',
               1300: '#1CED00', 1200: '#00E951', 1100: '#00E4BB', 1000: '#009EE0',
               900: '#0034DB', 800: '#3100D7', 700: '#9300D2'}
@@ -116,6 +121,9 @@ def s11_plot_all(a_run_output):
                       color=colors[wl])
     ax.set_title('S11: {}'.format(a_run_output.runname))
     ax.set_xticks(np.pi / 180. * np.linspace(0, 360, 12, endpoint=False))
+    if output_dir:
+        outfile = '{}{}_all_s11'.format(output_dir, a_run_output.runname)
+        fig.savefig('{}.png'.format(outfile))
     plt.show()
 
 
@@ -140,3 +148,9 @@ def plot_logpolar(ax, theta, r_, bullseye=None, min10=None, max10=None,
     #ax.viewLim.x0 = np.deg2rad(0)
     return ax
 
+def plot_all(a_run_output, an_output_dir):
+    hapke_refl_plot(a_run_output, absolute=False, output_dir=an_output_dir,
+                    include_csv=True)
+    hapke_refl_plot(a_run_output, output_dir=an_output_dir, absolute=True)
+    s11_plots(a_run_output, an_output_dir)
+    s11_plot_all(a_run_output, an_output_dir)
