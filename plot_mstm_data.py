@@ -31,7 +31,7 @@ def hapke_refl_plot(a_run_output, absolute=False, output_dir=None,
     if output_dir:
         outfile = '{}{}_refl'.format(output_dir, a_run_output.runname)
         if absolute:
-            outfile.append('_abs')
+            outfile.join('_abs')
         fig.savefig('{}.png'.format(outfile))
         if include_csv:
             try:

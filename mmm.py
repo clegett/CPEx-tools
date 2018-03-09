@@ -610,7 +610,7 @@ class RunOutput(object):
 
         input_dir_name = input_dir_name.strip()
         if not input_dir_name.endswith('/'):
-            input_dir_name.append('/')
+            input_dir_name.join('/')
         self.input_dir_name = input_dir_name
         file_list = glob.glob('{}dat/*.dat'.format(input_dir_name))
         self.wl_dict = dict()
