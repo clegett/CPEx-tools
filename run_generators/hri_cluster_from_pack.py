@@ -195,19 +195,16 @@ if __name__ == '__main__':
     """
     rhost_outer = 500
     drrim_outer = 100
-    rincl_outer = [5, 10, 20, 32, 43]
-    nincl_outer = [[None, 64, 640, 6400],
-                   [8, 80, 800, 8000],
-                   [1, 10, 100, 1000],
-                   [2, 20, 200, None],
-                   [1, 10, 100, None]]
-    spheres_in_pack_outer = [2, 3, 5, 10, 25, 50]
+    rincl_outer = [5, 10] 
+    nincl_outer = [[None, None, 640, None],
+                   [None, None, 800, None]]
+    spheres_in_pack_outer = [25]
     pack_directory_outer = 'packs/'
     queue_outer = 'normal'
     cpumodel_outer = 'bro'
-    nodes_outer = [50, 100, 200]
+    nodes_outer = [40, 150, 300]
     tpn_outer = 28
-    walltime_outer = ['0:59:00', '3:59:00', '7:59:00']
+    walltime_outer = ['1:59:00', '3:59:00', '7:59:00']
     """
     END OF INPUT VARIABLES
     Do not edit code below here unless you know what you're doing!
@@ -233,7 +230,7 @@ if __name__ == '__main__':
                         use_time = walltime_outer[2]
                     else:
                         break  # too many spheres for now
-                    print('Working on{}x{}-{}-{}-{}'.format(nsphere,
+                    print('Working on {}x{}-{}-{}-{}'.format(nsphere,
                                                             rhost_outer,
                                                             drrim_outer,
                                                             radius, num))
