@@ -114,85 +114,117 @@ class SpectralData(object):
         self.yunits = yunits
         self.name = name
 
-    def convert_xdata(self, from_units, to_units):
+    def convert_xdata(self, to_units, from_units=None):
+        if from_units is None:
+            from_units = self.xunits
         if from_units is to_units:
             pass
         elif from_units is SpectralUnits.WAVENUMBER:
             if to_units is SpectralUnits.MICRON:
                 self.xdata = [1e4 / x for x in self.xdata]
+                self.xunits = SpectralUnits.MICRON
             elif to_units is SpectralUnits.NANOMETER:
                 self.xdata = [1e7 / x for x in self.xdata]
+                self.xunits = SpectralUnits.NANOMETER
             elif to_units is SpectralUnits.ANGSTROM:
                 self.xdata = [1e8 / x for x in self.xdata]
+                self.xunits = SpectralUnits.ANGSTROM
             elif to_units is SpectralUnits.EV:
                 self.xdata = [HC / 1e-4 * x for x in self.xdata]
+                self.xunits = SpectralUnits.EV
             elif to_units is SpectralUnits.KEV:
                 self.xdata = [HC / 1e-7 * x for x in self.xdata]
+                self.xunits = SpectralUnits.KEV
             else:
                 pass
         elif from_units is SpectralUnits.MICRON:
             if to_units is SpectralUnits.WAVENUMBER:
                 self.xdata = [1e4 / x for x in self.xdata]
+                self.xunits = SpectralUnits.WAVENUMBER
             elif to_units is SpectralUnits.NANOMETER:
                 self.xdata = [1e3 * x for x in self.xdata]
+                self.xunits = SpectralUnits.NANOMETER
             elif to_units is SpectralUnits.ANGSTROM:
                 self.xdata = [1e4 * x for x in self.xdata]
+                self.xunits = SpectralUnits.ANGSTROM
             elif to_units is SpectralUnits.EV:
                 self.xdata = [HC / x for x in self.xdata]
+                self.xunits = SpectralUnits.EV
             elif to_units is SpectralUnits.KEV:
                 self.xdata = [HC / x / 1e-3 for x in self.xdata]
+                self.xunits = SpectralUnits.KEV
             else:
                 pass
         elif from_units is SpectralUnits.NANOMETER:
             if to_units is SpectralUnits.WAVENUMBER:
                 self.xdata = [1e7 / x for x in self.xdata]
+                self.xunits = SpectralUnits.WAVENUMBER
             elif to_units is SpectralUnits.MICRON:
                 self.xdata = [x / 1e3 for x in self.xdata]
+                self.xunits = SpectralUnits.MICRON
             elif to_units is SpectralUnits.ANGSTROM:
                 self.xdata = [1e1 * x for x in self.xdata]
+                self.xunits = SpectralUnits.ANGSTROM
             elif to_units is SpectralUnits.EV:
                 self.xdata = [HC * 1e3 / x for x in self.xdata]
+                self.xunits = SpectralUnits.EV
             elif to_units is SpectralUnits.KEV:
                 self.xdata = [HC / x for x in self.xdata]
+                self.xunits = SpectralUnits.KEV
             else:
                 pass
         elif from_units is SpectralUnits.ANGSTROM:
             if to_units is SpectralUnits.WAVENUMBER:
                 self.xdata = [1e8 / x for x in self.xdata]
+                self.xunits = SpectralUnits.WAVENUMBER
             elif to_units is SpectralUnits.MICRON:
                 self.xdata = [x / 1e4 for x in self.xdata]
+                self.xunits = SpectralUnits.MICRON
             elif to_units is SpectralUnits.NANOMETER:
                 self.xdata = [x / 1e1 for x in self.xdata]
+                self.xunits = SpectralUnits.NANOMETER
             elif to_units is SpectralUnits.EV:
                 self.xdata = [HC * 1e4 / x for x in self.xdata]
+                self.xunits = SpectralUnits.EV
             elif to_units is SpectralUnits.KEV:
                 self.xdata = [HC / x / 1e4 for x in self.xdata]
+                self.xunits = SpectralUnits.KEV
             else:
                 pass
         elif from_units is SpectralUnits.EV:
             if to_units is SpectralUnits.WAVENUMBER:
                 self.xdata = [1e4 / x / HC for x in self.xdata]
+                self.xunits = SpectralUnits.WAVENUMBER
             elif to_units is SpectralUnits.NANOMETER:
                 self.xdata = [1e3 * x / HC for x in self.xdata]
+                self.xunits = SpectralUnits.NANOMETER
             elif to_units is SpectralUnits.MICRON:
                 self.xdata = [x / HC for x in self.xdata]
+                self.xunits = SpectralUnits.MICRON
             elif to_units is SpectralUnits.ANGSTROM:
                 self.xdata = [1e4 * x / HC for x in self.xdata]
+                self.xunits = SpectralUnits.ANGSTROM
             elif to_units is SpectralUnits.KEV:
                 self.xdata = [x / 1e3 for x in self.xdata]
+                self.xunits = SpectralUnits.KEV
             else:
                 pass
         elif from_units is SpectralUnits.KEV:
             if to_units is SpectralUnits.WAVENUMBER:
                 self.xdata = [1e1 / x / HC for x in self.xdata]
+                self.xunits = SpectralUnits.WAVENUMBER
             elif to_units is SpectralUnits.NANOMETER:
                 self.xdata = [1e6 * x / HC for x in self.xdata]
+                self.xunits = SpectralUnits.NANOMETER
             elif to_units is SpectralUnits.MICRON:
                 self.xdata = [x * 1e3 / HC for x in self.xdata]
+                self.xunits = SpectralUnits.MICRON
             elif to_units is SpectralUnits.ANGSTROM:
                 self.xdata = [1e7 * x / HC for x in self.xdata]
+                self.xunits = SpectralUnits.ANGSTROM
             elif to_units is SpectralUnits.EV:
                 self.xdata = [x * 1e-3 for x in self.xdata]
+                self.xunits = SpectralUnits.EV
             else:
                 pass
 
