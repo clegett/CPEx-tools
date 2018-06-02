@@ -2,7 +2,8 @@
 """Convert two column spectral data from wavelength to wavenumbers.
 
 Converts spectral data from wavelength to wavenumbers. Data is accepted in
-any two column (wavelength | wavenumber)(delimiter)(reflectance, etc...) format.
+any two column (wavelength | wavenumber)(delimiter)(reflectance, etc...)
+format.
 
 
 This program is free software: you can redistribute it and/or modify it under
@@ -19,8 +20,10 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import argparse
-from enum import Enum
+import itertools
 from pint import UnitRegistry
+import sys
+import csv
 
 __author__ = 'Carey Legett'
 __contact__ = 'carey.legett@stonybrook.edu'
@@ -34,7 +37,7 @@ __maintainer = 'Carey Legett'
 __status__ = 'Development'
 __version__ = '0.1a'
 
-HC = 1.23984193
+ureg = UnitRegistry()
 
 
 def parse_cmdln_args():
@@ -66,169 +69,87 @@ def parse_cmdln_args():
     parser.add_argument('-f', '--input-file', required=True,
                         help='''The name of the input file (include path if the
                         file is not in this directory).''', dest='ifile')
-    parser.add_argument('-a', '--xstart', type=int, required=True,
-                        help='''The x value at which to begin the continuum 
-                        calculation.''', dest='xa')
-    parser.add_argument('-b', '--xstop', type=int, required=True, help='''The x
-                        value at which to end the continuum calculation.''',
-                        dest='xb')
+    parser.add_argument('-x', '--xunits', type=str, required=True,
+                        help='''The units that the x data are in (e.g. 
+                        'micrometers' or 'wavenumbers'.''', dest='xunits')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-d', '--delimiter', help='''The delimiter for the input
                        file. A single character representing the actual 
                        delimiter. Mutually exclusive with -w or 
-                       --whitespace''', dest='delim')
+                       --whitespace''', dest='in_delim')
     group.add_argument('-w', '--whitespace', help='''Indicates the delimiter is
                        either tabs or spaces. Mutually exclusive with -d or 
                        --delimiter.''', action='store_true', dest='whitespace')
+    parser.add_argument('-n', '--skip-lines', default=0, help='''Skip this many
+                            lines of the input file before reading in data.''',
+                        type=int, dest='skip')
     parser.add_argument('-o', '--output-file', nargs='?', default='output.txt',
                         help='''The name of the output file (include path 
                         if you want the file somewhere other than in the 
                         current directory). Defaults to output.txt.''',
                         dest='ofile')
+    parser.add_argument('-s', '--output-delimiter', required=False, help='''The
+                        delimiter to be used in the output file. Defults to tab
+                        .''', dest='out_delim')
     parser.add_argument('-v', '--verbose', action='store_true', dest='v',
                         help='Give status information during processing.')
 
     return parser.parse_args()
 
 
-class SpectralUnits(Enum):
-    WAVENUMBER = 0
-    MICRON = 1
-    NANOMETER = 2
-    ANGSTROM = 3
-    EV = 4
-    KEV = 5
+def read_input_file(filename, delimiter, whitespace_flag, skip_lines, xunits,
+                    verbose):
+    if verbose:
+        print('Reading input file...')
+
+    try:
+        with open(filename, 'rt', newline='') as infile:
+            if whitespace_flag:
+                rawdata = [line.split() for line in
+                           itertools.islice(infile, skip_lines, None)]
+            else:
+                rawdata = [line.split(delimiter) for line in
+                           itertools.islice(infile, skip_lines, None)]
+        if not rawdata:
+            sys.exit('No data in file {}'.format(filename))
+    except IOError as e:
+        sys.exit('I/O error: file {}: {}'.format(filename, e))
+
+    mydata = [[float(astring) for astring in inner] for inner in rawdata]
+    if verbose:
+        print('Assigning units.')
+    mydata = [row[0] * ureg[f'{xunits}'] for row in mydata]
+    # If this fails, it is likely that the data read from the input file is not
+    #  numeric. It could also happen if the delimiter was not correctly
+    # specified.
+
+    if verbose:
+        print('Done with input.')
+
+    return mydata
 
 
-class SpectralData(object):
-    def __init__(self, xdata=None, ydata=None, xunits=None, yunits=None,
-                 name=None):
-        if xdata is None:
-            self.xdata = []
-        else:
-            self.xdata = xdata
-        if ydata is None:
-            self.ydata = []
-        else:
-            self.ydata = ydata
-        self.xunits = xunits
-        self.yunits = yunits
-        self.name = name
+def write_to_output(somedata, out_filename, out_delim, verbose_flag):
+    if verbose_flag:
+        print('Writing output file')
 
-    def convert_xdata(self, to_units, from_units=None):
-        if from_units is None:
-            from_units = self.xunits
-        if from_units is to_units:
-            pass
-        elif from_units is SpectralUnits.WAVENUMBER:
-            if to_units is SpectralUnits.MICRON:
-                self.xdata = [1e4 / x for x in self.xdata]
-                self.xunits = to_units
-            elif to_units is SpectralUnits.NANOMETER:
-                self.xdata = [1e7 / x for x in self.xdata]
-                self.xunits = to_units
-            elif to_units is SpectralUnits.ANGSTROM:
-                self.xdata = [1e8 / x for x in self.xdata]
-                self.xunits = to_units
-            elif to_units is SpectralUnits.EV:
-                self.xdata = [HC / 1e-4 * x for x in self.xdata]
-                self.xunits = SpectralUnits.EV
-            elif to_units is SpectralUnits.KEV:
-                self.xdata = [HC / 1e-7 * x for x in self.xdata]
-                self.xunits = SpectralUnits.KEV
-            else:
-                pass
-        elif from_units is SpectralUnits.MICRON:
-            if to_units is SpectralUnits.WAVENUMBER:
-                self.xdata = [1e4 / x for x in self.xdata]
-                self.xunits = SpectralUnits.WAVENUMBER
-            elif to_units is SpectralUnits.NANOMETER:
-                self.xdata = [1e3 * x for x in self.xdata]
-                self.xunits = SpectralUnits.NANOMETER
-            elif to_units is SpectralUnits.ANGSTROM:
-                self.xdata = [1e4 * x for x in self.xdata]
-                self.xunits = SpectralUnits.ANGSTROM
-            elif to_units is SpectralUnits.EV:
-                self.xdata = [HC / x for x in self.xdata]
-                self.xunits = SpectralUnits.EV
-            elif to_units is SpectralUnits.KEV:
-                self.xdata = [HC / x / 1e-3 for x in self.xdata]
-                self.xunits = SpectralUnits.KEV
-            else:
-                pass
-        elif from_units is SpectralUnits.NANOMETER:
-            if to_units is SpectralUnits.WAVENUMBER:
-                self.xdata = [1e7 / x for x in self.xdata]
-                self.xunits = SpectralUnits.WAVENUMBER
-            elif to_units is SpectralUnits.MICRON:
-                self.xdata = [x / 1e3 for x in self.xdata]
-                self.xunits = SpectralUnits.MICRON
-            elif to_units is SpectralUnits.ANGSTROM:
-                self.xdata = [1e1 * x for x in self.xdata]
-                self.xunits = SpectralUnits.ANGSTROM
-            elif to_units is SpectralUnits.EV:
-                self.xdata = [HC * 1e3 / x for x in self.xdata]
-                self.xunits = SpectralUnits.EV
-            elif to_units is SpectralUnits.KEV:
-                self.xdata = [HC / x for x in self.xdata]
-                self.xunits = SpectralUnits.KEV
-            else:
-                pass
-        elif from_units is SpectralUnits.ANGSTROM:
-            if to_units is SpectralUnits.WAVENUMBER:
-                self.xdata = [1e8 / x for x in self.xdata]
-                self.xunits = SpectralUnits.WAVENUMBER
-            elif to_units is SpectralUnits.MICRON:
-                self.xdata = [x / 1e4 for x in self.xdata]
-                self.xunits = SpectralUnits.MICRON
-            elif to_units is SpectralUnits.NANOMETER:
-                self.xdata = [x / 1e1 for x in self.xdata]
-                self.xunits = SpectralUnits.NANOMETER
-            elif to_units is SpectralUnits.EV:
-                self.xdata = [HC * 1e4 / x for x in self.xdata]
-                self.xunits = SpectralUnits.EV
-            elif to_units is SpectralUnits.KEV:
-                self.xdata = [HC / x / 1e4 for x in self.xdata]
-                self.xunits = SpectralUnits.KEV
-            else:
-                pass
-        elif from_units is SpectralUnits.EV:
-            if to_units is SpectralUnits.WAVENUMBER:
-                self.xdata = [1e4 / x / HC for x in self.xdata]
-                self.xunits = SpectralUnits.WAVENUMBER
-            elif to_units is SpectralUnits.NANOMETER:
-                self.xdata = [1e3 * x / HC for x in self.xdata]
-                self.xunits = SpectralUnits.NANOMETER
-            elif to_units is SpectralUnits.MICRON:
-                self.xdata = [x / HC for x in self.xdata]
-                self.xunits = SpectralUnits.MICRON
-            elif to_units is SpectralUnits.ANGSTROM:
-                self.xdata = [1e4 * x / HC for x in self.xdata]
-                self.xunits = SpectralUnits.ANGSTROM
-            elif to_units is SpectralUnits.KEV:
-                self.xdata = [x / 1e3 for x in self.xdata]
-                self.xunits = SpectralUnits.KEV
-            else:
-                pass
-        elif from_units is SpectralUnits.KEV:
-            if to_units is SpectralUnits.WAVENUMBER:
-                self.xdata = [1e1 / x / HC for x in self.xdata]
-                self.xunits = SpectralUnits.WAVENUMBER
-            elif to_units is SpectralUnits.NANOMETER:
-                self.xdata = [1e6 * x / HC for x in self.xdata]
-                self.xunits = SpectralUnits.NANOMETER
-            elif to_units is SpectralUnits.MICRON:
-                self.xdata = [x * 1e3 / HC for x in self.xdata]
-                self.xunits = SpectralUnits.MICRON
-            elif to_units is SpectralUnits.ANGSTROM:
-                self.xdata = [1e7 * x / HC for x in self.xdata]
-                self.xunits = SpectralUnits.ANGSTROM
-            elif to_units is SpectralUnits.EV:
-                self.xdata = [x * 1e-3 for x in self.xdata]
-                self.xunits = SpectralUnits.EV
-            else:
-                pass
+    try:
+        with open(out_filename, 'w', newline='') as outfile:
+            writer = csv.writer(outfile, delimiter=out_delim)
+            header = ['wn', 'data']
+
+            writer.writerow(header)
+            writer.writerows(somedata)
+    except IOError as e:
+        sys.exit(f'Output file error: {e}, {sys.exc_info()}')
 
 
 if __name__ == '__main__':
     args = parse_cmdln_args()
+    x = ureg[f'{args.x}']
+    data = read_input_file(args.ifile, args.in_delim, args.whitespace,
+                           args.skip, args.xunits, args.v)
+
+    data = [line[0].to(1 / ureg.centimeter, 'sp') for line in data]
+
+    write_to_output(data, args.ofile, args.out_delim, args.v)

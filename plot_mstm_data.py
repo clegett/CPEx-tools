@@ -12,7 +12,8 @@ def hapke_refl_plot(a_run_output, absolute=False, output_dir=None,
     for wl in a_run_output.wl_list:
         if not a_run_output.wl_dict[wl].incomplete:
             refl_dict[wl] = a_run_output.wl_dict[wl].hapke_refl
-
+        else:
+            print('Found a bad wl in refl plot!')
     wls = list()
     refls = list()
     fig = plt.figure()
@@ -29,7 +30,7 @@ def hapke_refl_plot(a_run_output, absolute=False, output_dir=None,
     plt.xticks(np.arange(700, 1800, 100))
     plt.show()
     if output_dir:
-        outfile = '{}{}_refl'.format(output_dir, a_run_output.runname)
+        outfile = '{}/{}_refl'.format(output_dir, a_run_output.runname)
         if absolute:
             outfile.join('_abs')
         fig.savefig('{}.png'.format(outfile))
@@ -64,14 +65,13 @@ def s11_plots(a_run_output, output_dir=None):
 
         angles = (np.pi / 180) * np.asarray(angles)
         s11s = np.asarray(s11s)
-        fig = plt.figure()
-        ax = plt.subplots(1, 1, subplot_kw=dict(polar=True))[1]
+        fig, ax = plt.subplots(1, 1, subplot_kw=dict(polar=True))
         plot_logpolar(ax, angles, s11s)
         ax.set_title('{}: {} nm'.format(a_run_output.runname, wl))
-        if output_dir:
-            outfile = '{}{}_{}_s11'.format(output_dir, a_run_output.runname, wl)
-            fig.savefig('{}.png'.format(outfile))
         plt.show()
+        if output_dir:
+            outfile = '{}/{}_{}_s11'.format(output_dir, a_run_output.runname, wl)
+            fig.savefig('{}.png'.format(outfile))
 
 
 def s11_plot_all(a_run_output, output_dir=None):
@@ -90,7 +90,6 @@ def s11_plot_all(a_run_output, output_dir=None):
 
     fig = plt.figure()
     ax = fig.add_subplot(111, polar=True)
-    print(ax)
 
     max_max10 = None
     min_min10 = None
@@ -122,7 +121,7 @@ def s11_plot_all(a_run_output, output_dir=None):
     ax.set_title('S11: {}'.format(a_run_output.runname))
     ax.set_xticks(np.pi / 180. * np.linspace(0, 360, 12, endpoint=False))
     if output_dir:
-        outfile = '{}{}_all_s11'.format(output_dir, a_run_output.runname)
+        outfile = '{}/{}_all_s11'.format(output_dir, a_run_output.runname)
         fig.savefig('{}.png'.format(outfile))
     plt.show()
 

@@ -36,6 +36,7 @@ import re
 import glob
 import json
 import pickle
+import os
 
 __author__ = 'Carey Legett'
 __contact__ = 'carey.legett@stonybrook.edu'
@@ -610,17 +611,18 @@ class RunOutput(object):
 
         input_dir_name = input_dir_name.strip()
         if not input_dir_name.endswith('/'):
-            input_dir_name.join('/')
+            input_dir_name += '/'
         self.input_dir_name = input_dir_name
         file_list = glob.glob('{}dat/*.dat'.format(input_dir_name))
         self.wl_dict = dict()
         for file in file_list:
-            wl = int(re.search(r'(\d{3,4})nm\.dat', file).group(1))
-            self.wl_dict[wl] = SingleRunOutput.from_dat_file(file)
-            if self.wl_dict[wl].unpol_qext is None:
-                self.wl_dict[wl].incomplete = True
-            else:
-                self.wl_dict[wl].incomplete = False
+            wl = int(re.search(r'(\d{3,4})\.?nm\.dat', file).group(1))
+            if os.path.isfile('{}/sc/{}.nm.sc.dat'.format(input_dir_name, wl)):
+                self.wl_dict[wl] = SingleRunOutput.from_dat_file(file)
+                if self.wl_dict[wl].unpol_qext is None:
+                    self.wl_dict[wl].incomplete = True
+                else:
+                    self.wl_dict[wl].incomplete = False
         self.wl_list = [*self.wl_dict]
         self.wl_list.sort()
 
@@ -649,7 +651,7 @@ class RunOutput(object):
                 sys.exit('I/O error: file {}: {}'.format(stats_file, e))
         else:
             raise ModelRunTypeError('This model run does not have a stats file'
-                                    '.')
+                                    ' in {}.'.format(input_dir_name))
 
         for wl in self.wl_list:
             mu0 = math.cos(math.radians(theta_i))
@@ -662,6 +664,10 @@ class RunOutput(object):
                 * self.wl_dict[wl].dcsca
             self.wl_dict[wl].ssa = (self.wl_dict[wl].unpol_qsca /
                                     self.wl_dict[wl].unpol_qext)
+            if self.wl_dict[wl].ssa > 1:
+                print('Bad SSA!')
+                self.wl_dict[wl].incomplete = True
+                self.wl_dict[wl].ssa = 1
             gamma = math.sqrt(1 - self.wl_dict[wl].ssa)
             hmu0 = h(mu0, gamma)
             hmu = h(mu, gamma)
@@ -863,9 +869,12 @@ class SingleRunOutput(object):
                         line = next(f)
                         while re.match(r'^\s*\d+\.\d{2}', line):
                             thisrow = line.split()
-                            thisdict = {a: float(b) for a, b in
-                                        zip(headers[1:], thisrow[1:])}
-                            thisrun.s_matrix_dict[thisrow[0]] = thisdict
+                            if thisrow[2] == 'NaN':
+                                pass
+                            else:
+                                thisdict = {a: float(b) for a, b in
+                                            zip(headers[1:], thisrow[1:])}
+                                thisrun.s_matrix_dict[thisrow[0]] = thisdict
                             try:
                                 line = next(f)
                             except StopIteration:
