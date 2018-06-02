@@ -20,6 +20,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
 from enum import Enum
+from pint import UnitRegistry
 
 __author__ = 'Carey Legett'
 __contact__ = 'carey.legett@stonybrook.edu'
@@ -122,13 +123,13 @@ class SpectralData(object):
         elif from_units is SpectralUnits.WAVENUMBER:
             if to_units is SpectralUnits.MICRON:
                 self.xdata = [1e4 / x for x in self.xdata]
-                self.xunits = SpectralUnits.MICRON
+                self.xunits = to_units
             elif to_units is SpectralUnits.NANOMETER:
                 self.xdata = [1e7 / x for x in self.xdata]
-                self.xunits = SpectralUnits.NANOMETER
+                self.xunits = to_units
             elif to_units is SpectralUnits.ANGSTROM:
                 self.xdata = [1e8 / x for x in self.xdata]
-                self.xunits = SpectralUnits.ANGSTROM
+                self.xunits = to_units
             elif to_units is SpectralUnits.EV:
                 self.xdata = [HC / 1e-4 * x for x in self.xdata]
                 self.xunits = SpectralUnits.EV
