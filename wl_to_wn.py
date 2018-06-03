@@ -116,7 +116,6 @@ def read_input_file(filename, delimiter, whitespace_flag, skip_lines, xunits,
         sys.exit('I/O error: file {}: {}'.format(filename, e))
 
     mydata = [[float(astring) for astring in inner] for inner in rawdata]
-    print(mydata)
     if verbose:
         print('Assigning units.')
     mydata = [[row[0] * ureg[f'{xunits}'], row[1]] for row in mydata]
@@ -133,7 +132,6 @@ def read_input_file(filename, delimiter, whitespace_flag, skip_lines, xunits,
 def write_to_output(somedata, out_filename, out_delim, verbose_flag):
     if verbose_flag:
         print('Writing output file')
-        print(somedata)
     try:
         with open(out_filename, 'w', newline='') as outfile:
             writer = csv.writer(outfile, delimiter=out_delim)
@@ -151,7 +149,6 @@ if __name__ == '__main__':
     data = read_input_file(args.ifile, args.in_delim, args.whitespace,
                            args.skip, args.xunits, args.v)
 
-    #print(data)
     data = [[line[0].to(1 / ureg.centimeter, 'sp').magnitude, line[1]] for line in data]
 
     write_to_output(data, args.ofile, args.out_delim, args.v)
