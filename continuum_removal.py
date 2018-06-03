@@ -24,6 +24,7 @@ import argparse
 import sys
 import itertools
 import csv
+import numpy as np
 
 __author__ = 'Carey Legett'
 __contact__ = 'carey.legett@stonybrook.edu'
@@ -179,11 +180,13 @@ def remove_continuum(mydata, xa, xb, verbose_flag):
         mydata ([float, float]): A list of lists of two floats representing the
             unnormalized initial data.
         xa (float): The value of x at which to start the linear fit. This
-            must be an x value contained in the data list since no searching
-            for nearest values is performed.
-        xb (float): The value of x at which to stop the linear fit. This must
-            be an x value contained in the data list since no searching for 
-            nearest values is performed.
+            must be an x value in the range of the data list since the
+            searching doesn't check to make sure xa falls within the bounds of
+            the data.
+        xb (float): The value of x at which to stop the linear fit. This
+            must be an x value in the range of the data list since the
+            searching doesn't check to make sure xa falls within the bounds of
+            the data.
         verbose_flag (bool): True for progress output, False otherwise.
         
     Returns:
@@ -196,11 +199,15 @@ def remove_continuum(mydata, xa, xb, verbose_flag):
     """
     if verbose_flag:
         print('Calculating continuum line')
-    
-    startx = xa
-    stopx = xb
-    starty = data[int(xa)-int(data[0][0])][1]
-    stopy = data[int(xb)-int(data[0][0])][1]
+
+    start_index = np.abs(np.array(mydata)[:, 0] - xa).argmin()
+    stop_index = np.abs(np.array(mydata)[:, 0] - xb).argmin()
+
+    startx = mydata[start_index][0]
+    stopx = mydata[stop_index][0]
+
+    starty = mydata[start_index][1]
+    stopy = mydata[stop_index][1]
     
     if verbose_flag: 
         print('Start: ({!s},{!s})'.format(startx, starty))

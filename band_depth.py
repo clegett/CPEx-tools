@@ -18,13 +18,24 @@ for file in filelist:
                   line[1]] for line in temp_data]
 
     # continuum remove on specified points
-    temp_data = cr.remove_continuum(temp_data, 700, 1600, False)
-    file_data.append([temp_data[0], temp_data[3]])
+    start_wl = 700 * conv.ureg['nanometers']
+    stop_wl = 1600 * conv.ureg['nanometers']
+    start_wn = start_wl.to(1 / conv.ureg['centimeters'], 'sp').magnitude
+    stop_wn = stop_wl.to(1 / conv.ureg['centimeters'], 'sp').magnitude
+
+    temp_data = cr.remove_continuum(temp_data, start_wn, stop_wn, False)
+    wls = [row[0] for row in temp_data]
+    cr_spec = [row[3] for row in temp_data]
+    file_data.append(list(zip(wls, cr_spec)))
 
 # calculate band depth
 band_depths = []
-band_index = 550
+band_index = 400
+# print(f'length of file_data: {len(file_data)}')
 for run in file_data:
+    # print(f'run length: {len(run)}')
+    # print(f'length of run[0]: {len(run[0])}')
+    # print(f'run[0]: {run[0]}')
     band_depths.append(run[band_index][1])
 
 # write band depths to file
@@ -34,6 +45,6 @@ try:
         header = ['file', f'banddepth_at_{band_index}']
 
         writer.writerow(header)
-        writer.writerows(zip(filelist, band_depths))
+        writer.writerows(zip(filelist, [1 - depth for depth in band_depths]))
 except IOError as e:
     sys.exit(f'Output file error: {e}, {sys.exc_info()}')
