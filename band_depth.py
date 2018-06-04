@@ -8,7 +8,7 @@ import continuum_removal as cr
 import wl_to_wn as conv
 
 # get list of asc files in directory matching pattern
-filelist = glob.glob('*.asc')
+filelist = sorted(glob.glob('*.asc'))
 
 file_data = []
 # read file and convert to wn
@@ -18,19 +18,21 @@ for file in filelist:
                   line[1]] for line in temp_data]
 
     # continuum remove on specified points
-    start_wl = 700 * conv.ureg['nanometers']
-    stop_wl = 1600 * conv.ureg['nanometers']
+    start_wl = 624 * conv.ureg['nanometers']
+    stop_wl = 1823 * conv.ureg['nanometers']
     start_wn = start_wl.to(1 / conv.ureg['centimeters'], 'sp').magnitude
     stop_wn = stop_wl.to(1 / conv.ureg['centimeters'], 'sp').magnitude
 
     temp_data = cr.remove_continuum(temp_data, start_wn, stop_wn, False)
+    cr.write_cont_removed_output(temp_data, f'{file}_cr.csv', False, False,
+                                 False)
     wls = [row[0] for row in temp_data]
     cr_spec = [row[3] for row in temp_data]
     file_data.append(list(zip(wls, cr_spec)))
 
 # calculate band depth
 band_depths = []
-band_index = 400
+band_index = 459
 # print(f'length of file_data: {len(file_data)}')
 for run in file_data:
     # print(f'run length: {len(run)}')
@@ -40,7 +42,8 @@ for run in file_data:
 
 # write band depths to file
 try:
-    with open('band_depths.csv', 'w', newline='') as outfile:
+    with open(f'index{band_index}_band_depths.csv', 'w', newline='') \
+            as outfile:
         writer = csv.writer(outfile)
         header = ['file', f'banddepth_at_{band_index}']
 

@@ -287,7 +287,7 @@ def write_cont_removed_output(myoutput, output_filename, write_input_flag,
                 header.append('original')
             if write_cont_flag:
                 header.append('continuum')
-            header.append('cont_removed')
+            header.append(f'cont_removed{output_filename}')
 
             writer.writerow(header)
             writer.writerows(filtered_output)
