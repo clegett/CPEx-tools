@@ -6,6 +6,8 @@ import sys
 import glob
 import continuum_removal as cr
 import wl_to_wn as conv
+import numpy as np
+from scipy import stats
 
 # get list of asc files in directory matching pattern
 filelist = sorted(glob.glob('*.asc'))
