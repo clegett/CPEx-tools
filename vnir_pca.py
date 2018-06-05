@@ -6,8 +6,6 @@ from scipy.signal import savgol_filter as sf
 import pandas as pd
 import csv
 import sys
-import matplotlib
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 run_map = {'Avg-1': 'Ol', 'Avg-2': 'Ol05', 'Avg-3': 'Ol1', 'Avg-4': 'Ol2',
@@ -56,12 +54,12 @@ filt_dref = [sf(row, 5, 3, 1) for row in reflr]
 df = pd.DataFrame({'x': wls, 'reflr': reflr[0], 'filt_ref': filt_ref[0],
                    'filt_dref': filt_dref[0]})
 
-plt.plot('x', 'reflr', data=df)
-plt.plot('x', 'filt_ref', data=df)
-plt.plot('x', 'filt_dref', data=df)
-plt.legend()
-print('trying to plot')
-plt.show()
+#plt.plot('x', 'reflr', data=df)
+#plt.plot('x', 'filt_ref', data=df)
+#plt.plot('x', 'filt_dref', data=df)
+#plt.legend()
+#print('trying to plot')
+#plt.show()
 
 data = pd.DataFrame(dict(zip(wls, refl)), index=run_names)
 data.drop(['Bad1', 'Bad2', 'Bad3'])
@@ -70,3 +68,4 @@ x = data.loc[:, wls].values
 x = StandardScaler().fit_transform(x)
 pc = pca.fit_transform(x)
 principalDf = pd.DataFrame(data=pc)
+print(principalDf)
