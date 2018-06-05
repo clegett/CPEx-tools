@@ -117,7 +117,7 @@ normed_dict = [{'slope': (row['slope'] - min_slope)/(max_slope - min_slope),
                 'contrast': (row['contrast'] - min_contrast)/(max_contrast -
                                                               min_contrast),
                 'label': row['label']} for row in data_dict if 'Bad' not in
-               data_dict['label']]
+               row['label'] and 'Ol' in row['label']]
 
 
 fdata = [{
