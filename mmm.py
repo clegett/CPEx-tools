@@ -307,6 +307,10 @@ class ModelRun(object):
                     ModelOptionValue.mov_from_name(
                         'fixed_or_random_orientation', 0))
                 self.option_val_list.append(
+                    ModelOptionValue.mov_from_name('min_scattering_angle_deg'))
+                self.option_val_list.append(
+                    ModelOptionValue.mov_from_name('max_scattering_angle_deg'))
+                self.option_val_list.append(
                     ModelOptionValue.mov_from_name('output_file'))
                 self.option_val_list.append(
                     ModelOptionValue.mov_from_name('run_print_file'))
